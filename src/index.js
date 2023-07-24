@@ -80,6 +80,8 @@ function listProcessElements(parsedXML) {
 // Main function to read the zip file and process the iFlow
 async function main() {
   try {
+    //download the zip file from sap api hub
+    await utils.downloadZipFile("Bamboo_AD_UserUpsert_PROD", "active");
     // Read the zip file from the filesystem
     const zipEntries = await utils.readZipFile();
     // Find the iFlow files (BPMN XMLs)
