@@ -12,6 +12,50 @@ subgraph Legend
       legendSplitter[[Splitter]]:::classSplitter
 
 end
+%% PARTICIPANT PD
+    Participant_98950[(PD)]
+%% PARTICIPANT LDAP_CREATE
+    Participant_98890[(LDAP_CREATE)]
+%% PARTICIPANT PD_LDAP_MODIFY
+    Participant_98897[(PD_LDAP_MODIFY)]
+%% PARTICIPANT PD_LDAP_SEARCH_EMAIL
+    Participant_98931[(PD_LDAP_SEARCH_EMAIL)]
+%% PARTICIPANT PD_LDAP_SearchId
+    Participant_98963[(PD_LDAP_SearchId)]
+%% PARTICIPANT MAIL_CREATE_MNG
+    Participant_98999[(MAIL_CREATE_MNG)]
+%% PARTICIPANT POST_BambooHR
+    Participant_99010[(POST_BambooHR)]
+%% PARTICIPANT PD_LDAP_SEARCH_USER
+    Participant_1462402[(PD_LDAP_SEARCH_USER)]
+%% PARTICIPANT R_Sharepoint
+    Participant_1462461[(R_Sharepoint)]
+%% PARTICIPANT MAIL_SEND_MISSING_LOCATIONS
+    Participant_1462475[(MAIL_SEND_MISSING_LOCATIONS)]
+%% PARTICIPANT PD_LDAP_MODIFY_ADD_GROUP
+    Participant_1462516[(PD_LDAP_MODIFY_ADD_GROUP)]
+%% PARTICIPANT KPCS_ActivateUser
+    Participant_1462551[(KPCS_ActivateUser)]
+%% PARTICIPANT getSupervisonDistName
+%% PARTICIPANT Integration Process
+%% PARTICIPANT Add group to user
+%% PARTICIPANT ProcessLdapChange
+%% PARTICIPANT ProcessLdapCreate
+%% PARTICIPANT createEmail
+%% PARTICIPANT Get location from Sharepoint
+%% PARTICIPANT getUserFromAD
+    ServiceTask_1462517 -->|ProcessDirect|Participant_1462516
+    ServiceTask_1462399 -->|ProcessDirect|Participant_1462402
+    ServiceTask_1462474 -->|Mail|Participant_1462475
+    ServiceTask_98996 -->|Mail|Participant_98999
+    ServiceTask_98928 -->|ProcessDirect|Participant_98931
+    ServiceTask_99007 -->|HTTP|Participant_99010
+    Participant_98950 -->|ProcessDirect|StartEvent_1462603
+    ServiceTask_98886 -->|ProcessDirect|Participant_98890
+    ServiceTask_98892 -->|ProcessDirect|Participant_98897
+    ServiceTask_98960 -->|ProcessDirect|Participant_98963
+    ServiceTask_1462548 -->|HTTP|Participant_1462551
+    ServiceTask_1462458 -->|HTTP|Participant_1462461
   subgraph Process_98956[getSupervisonDistName]
     direction LR
     StartEvent_98957((Start 3))
@@ -236,4 +280,6 @@ classDef classScript stroke:#000,fill:#FFC0CB;
 classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;
 classDef classProcessCallElement stroke:#000,fill:#B0E0E6;
 classDef classEnricher stroke:#000,fill:#FFB6C1;
+classDef classExternalCall stroke:#000,fill:#FFB6C1;
 style Process_1 fill:#E0FFFF,stroke:#000;
+style Legend fill:#98FB98,stroke:#000;

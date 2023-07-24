@@ -12,77 +12,100 @@ class BPMNtoMermaid {
 
   shapeModifier(text, shape) {
     const shapeMap = {
-      'round': `(${text})`,
-      'stadium': `[${text}]`,
-      'subroutine': `[[${text}]]`,
-      'cylindrical': `(${text})`,
-      'circle': `((${text}))`,
-      'asymmetric': `>${text}]`,
-      'diamond': `{${text}}`,
-      'hexagon': `{{${text}}}`,
-      'parallelogram': `[/${text}/]`,
-      'trapezoid': `[/${text}\\]`,
-      'doubleCircle': `((${text}))`,
+      round: `(${text})`,
+      stadium: `[${text}]`,
+      subroutine: `[[${text}]]`,
+      cylindrical: `[(${text})]`,
+      circle: `((${text}))`,
+      asymmetric: `>${text}]`,
+      diamond: `{${text}}`,
+      hexagon: `{{${text}}}`,
+      parallelogram: `[/${text}/]`,
+      trapezoid: `[/${text}\\]`,
+      doubleCircle: `((${text}))`,
     };
 
     return shapeMap[shape] || text;
   }
 
-  showElement(elementId, elementName, shape, classRef=null) {
+  showElement(elementId, elementName, shape, classRef = null) {
     //if classRef is null, then dont use it
-    if (classRef===null) {
+    if (classRef === null) {
       return `    ${elementId}${this.shapeModifier(elementName, shape)}\n`;
     }
     //else use it
-    return `    ${elementId}${this.shapeModifier(elementName, shape)}:::${classRef}\n`;
+    return `    ${elementId}${this.shapeModifier(
+      elementName,
+      shape
+    )}:::${classRef}\n`;
+  }
+
+  showParticipant(participant) {
+    const participantId = participant.id;
+    const participantName = participant.name;
+    const participantType = participant.iflType;
+
+    //if participantType is IntegrationProcess, then dont show it
+    if (participantType === "IntegrationProcess") {
+      return "";
+    };
+
+    return this.showElement(participantId, participantName, "cylindrical");
   }
 
   showStartEvent(startEvent) {
     const startEventId = startEvent.id;
-    const startEventName = this.showElement(startEventId, startEvent.name, 'circle');
+    const startEventName = this.showElement(
+      startEventId,
+      startEvent.name,
+      "circle"
+    );
     return startEventName;
   }
 
   showEndEvent(endEvent) {
     const endEventId = endEvent.id;
-    const endEventName = this.showElement(endEventId, endEvent.name, 'circle');
+    const endEventName = this.showElement(endEventId, endEvent.name, "circle");
     return endEventName;
   }
 
   showCallActivity(event) {
     const eventId = event.id;
     const activityType = event.activityType;
-    let shape = 'stadium';
-    let fillColor = '#E0FFFF'; // Default pastel color
+    let shape = "stadium";
+    let fillColor = "#E0FFFF"; // Default pastel color
 
     switch (activityType) {
-      case 'Splitter':
-        shape = 'subroutine';
+      case "Splitter":
+        shape = "subroutine";
         break;
-      case 'Script':
-        shape = 'hexagon';
+      case "Script":
+        shape = "hexagon";
         break;
-      case 'JsonToXmlConverter':
-        shape = 'parallelogram';
+      case "JsonToXmlConverter":
+        shape = "parallelogram";
         break;
-      case 'ProcessCallElement':
-        shape = 'subroutine';
+      case "ProcessCallElement":
+        shape = "subroutine";
         break;
-      case 'Enricher':
-        shape = 'trapezoid';
+      case "Enricher":
+        shape = "trapezoid";
+        break;
+      case "ExternalCall":
+        shape = "asymmetric";
         break;
       default:
     }
 
     const classRef = `class${activityType}`;
-    const eventName = this.showElement(eventId, event.name, shape,classRef);
+    const eventName = this.showElement(eventId, event.name, shape, classRef);
 
     return `${eventName}`;
   }
 
   showExclusiveGateway(gateway) {
     const gatewayId = gateway.id;
-    const gatewayName = this.showElement(gatewayId, gateway.name, 'diamond');
+    const gatewayName = this.showElement(gatewayId, gateway.name, "diamond");
     return gatewayName;
   }
 
@@ -91,7 +114,7 @@ class BPMNtoMermaid {
     const subProcessName = subProcess.name;
 
     let subProcessCode = `  subgraph ${subProcessId}[${subProcessName}]\n`;
-    subProcessCode += '    direction LR\n'; // Set subgraph orientation to LR using "direction"
+    subProcessCode += "    direction LR\n"; // Set subgraph orientation to LR using "direction"
 
     if (subProcess.startEvent) {
       subProcess.startEvent.forEach((startEvent) => {
@@ -136,28 +159,36 @@ class BPMNtoMermaid {
       });
     }
 
-    subProcessCode += '  end\n'; // Close the subgraph
+    subProcessCode += "  end\n"; // Close the subgraph
 
     return subProcessCode;
   }
 
   showServiceTask(serviceTask) {
     const serviceTaskId = serviceTask.id;
-    const serviceTaskName = this.showElement(serviceTaskId, serviceTask.name, 'stadium');
+    const serviceTaskName = this.showElement(
+      serviceTaskId,
+      serviceTask.name,
+      "stadium"
+    );
     return serviceTaskName;
   }
 
-  showParticipant(participant) {
-    const participantId = participant.id;
-    const participantName = this.showElement(participantId, participant.name, 'stadium');
-    return participantName;
-  }
+  // showParticipant(participant) {
+  //   const participantId = participant.id;
+  //   const participantName = this.showElement(
+  //     participantId,
+  //     participant.name,
+  //     "stadium"
+  //   );
+  //   return participantName;
+  // }
 
   showSequenceFlow(sequenceFlow) {
     const sourceRef = sequenceFlow.sourceRef;
     const targetRef = sequenceFlow.targetRef;
     // if linkText is empty, use the sourceRef and targetRef
-    const linkText = sequenceFlow.name || '';
+    const linkText = sequenceFlow.name || "";
     if (!linkText) {
       return `    ${sourceRef} --> ${targetRef}\n`;
     } else {
@@ -168,26 +199,66 @@ class BPMNtoMermaid {
   addLegend() {
     let legend = `subgraph Legend\n`;
     legend += `  direction LR\n`;
-    legend += `  ${this.showElement('legendEnricher','Content Modifier','trapezoid','classEnricher')}\n`;
-    legend += `  ${this.showElement('legendJsonToXmlConverter','Json to XML Converter','parallelogram','classJsonToXmlConverter')}\n`;
-    legend += `  ${this.showElement('legendProcessCallElement','Process Call Element','subroutine','classProcessCallElement')}\n`;
-    legend += `  ${this.showElement('legendScript','Script','hexagon','classScript')}\n`;
-    legend += `  ${this.showElement('legendSplitter','Splitter','subroutine','classSplitter')}\n`;
+    legend += `  ${this.showElement(
+      "legendEnricher",
+      "Content Modifier",
+      "trapezoid",
+      "classEnricher"
+    )}\n`;
+    legend += `  ${this.showElement(
+      "legendJsonToXmlConverter",
+      "Json to XML Converter",
+      "parallelogram",
+      "classJsonToXmlConverter"
+    )}\n`;
+    legend += `  ${this.showElement(
+      "legendProcessCallElement",
+      "Process Call Element",
+      "subroutine",
+      "classProcessCallElement"
+    )}\n`;
+    legend += `  ${this.showElement(
+      "legendScript",
+      "Script",
+      "hexagon",
+      "classScript"
+    )}\n`;
+    legend += `  ${this.showElement(
+      "legendSplitter",
+      "Splitter",
+      "subroutine",
+      "classSplitter"
+    )}\n`;
     legend += `end\n`;
     return legend;
   }
 
-
   convertToMermaid() {
-    let mermaidCode = 'flowchart LR\n';
+    let mermaidCode = "flowchart LR\n";
     mermaidCode += this.addLegend();
 
-    Object.values(this.json).forEach((process) => {
+    //loop through all participants
+    Object.values(this.json.participants).forEach((participant) => {
+      const participantId = participant.id;
+      const participantName = participant.name;
+
+      //add comment participant
+      mermaidCode += `%% PARTICIPANT ${participantName}\n`;
+      mermaidCode += this.showParticipant(participant);
+    });
+
+    //loop through all message flows
+    Object.values(this.json.messageFlows).forEach((messageFlow) => {
+      mermaidCode += this.showSequenceFlow(messageFlow);
+    });
+
+    // Loop through all processes
+    Object.values(this.json.processes).forEach((process) => {
       const processId = process.id;
       const processName = process.name;
 
       mermaidCode += `  subgraph ${processId}[${processName}]\n`;
-      mermaidCode += '    direction LR\n'; // Set subgraph orientation to LR using "direction"
+      mermaidCode += "    direction LR\n"; // Set subgraph orientation to LR using "direction"
 
       if (process.startEvent) {
         process.startEvent.forEach((startEvent) => {
@@ -238,10 +309,10 @@ class BPMNtoMermaid {
         });
       }
 
-      mermaidCode += '  end\n'; // Close the subgraph
+      mermaidCode += "  end\n"; // Close the subgraph
     });
 
-    mermaidCode += '\n'; // Newline after the flowchart
+    mermaidCode += "\n"; // Newline after the flowchart
 
     // Define classes for each call activity type
     mermaidCode += `classDef classSplitter stroke:#000,fill:#FFDAB9;
@@ -249,7 +320,9 @@ classDef classScript stroke:#000,fill:#FFC0CB;
 classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;
 classDef classProcessCallElement stroke:#000,fill:#B0E0E6;
 classDef classEnricher stroke:#000,fill:#FFB6C1;
+classDef classExternalCall stroke:#000,fill:#FFB6C1;
 style Process_1 fill:#E0FFFF,stroke:#000;
+style Legend fill:#98FB98,stroke:#000;
 `;
 
     return mermaidCode;

@@ -37,6 +37,19 @@ class IFlowParser {
         return extensionElements;
     }
 
+    //get property by name
+    getPropertyByName(bpmnElement, propertyName) {
+        const extensionElements = this.getExtensionElements(bpmnElement);
+        if (extensionElements) {
+            const properties = extensionElements["ifl:property"];
+            const property = properties.filter((property) => property["key"]["_"] === propertyName);
+            if (property.length > 0) {
+                return property[0]["value"]["_"];
+            }
+        }
+        return "";
+    }
+
     //get property activityType
     getPropertyActivityType(bpmnElement) {
         const extensionElements = this.getExtensionElements(bpmnElement);
@@ -51,6 +64,8 @@ class IFlowParser {
         }
         return "";
     }
+
+
 
     //extract the basic data from the xml
     extractBasicData(bpmnElement) {
@@ -68,6 +83,57 @@ class IFlowParser {
             basicData.activityType = this.getPropertyActivityType(bpmnElement);
         }
         return basicData;
+    }
+
+    //get basic participant data
+    getBasicParticipantData(bpmnElement) {
+        const basicData = {};
+
+        basicData.id = bpmnElement["id"].value;
+        basicData.name = bpmnElement["name"].value;
+        basicData.iflType = bpmnElement["ifl:type"].value;
+
+        return basicData;
+    }
+
+    //get participant elements
+    getParticipantElements(inputXML) {
+        const participants = [];
+        const participantsRecords = inputXML["bpmn2:participant"];
+        if (participantsRecords) {
+            const participantArray = Array.isArray(participantsRecords) ? participantsRecords : [participantsRecords];
+            for (const participant of participantArray) {
+                const basicData = this.getBasicParticipantData(participant);
+                basicData.type = "bpmn2:participant"; // Add the type of element
+                participants.push(basicData);
+            }
+            return participants;
+        } else {
+            return [];
+        }
+    }
+
+    //get message flows
+    getMessageFlows(inputXML) {
+        const messageFlows = [];
+        const messageFlowsRecords = inputXML["bpmn2:messageFlow"];
+        if (messageFlowsRecords) {
+            const messageFlowArray = Array.isArray(messageFlowsRecords) ? messageFlowsRecords : [messageFlowsRecords];
+            for (const messageFlow of messageFlowArray) {
+                const basicData = {};
+                basicData.id = messageFlow["id"].value;
+                basicData.name = messageFlow["name"]?.value || "";
+                basicData.sourceRef = messageFlow["sourceRef"].value;
+                basicData.targetRef = messageFlow["targetRef"].value;
+                basicData.type = "bpmn2:messageFlow"; // Add the type of element
+                basicData.addressRef = this.getPropertyByName(messageFlow, "address");
+                basicData.addressResolved = "";
+                messageFlows.push(basicData);
+            }
+            return messageFlows;
+        } else {
+            return [];
+        }
     }
 
     //get elemnents by type
@@ -144,7 +210,7 @@ class IFlowParser {
                 //get the sequence flows
                 const sequenceFlows = this.getSequenceFlows(subProcess);
                 basicData["sequenceFlows"] = sequenceFlows;
-                
+
                 subProcesses.push(basicData);
 
             }
@@ -156,13 +222,19 @@ class IFlowParser {
 
     //get the process elements from the xml
     getProcessElements() {
-        const processElements = {};
+
+        const processElements = {
+            processes: {},
+            participants: [],
+            messageFlows: []
+        };
         const processElement = elementNames.process;
 
         // Get all process elements from the parsed XML
-        const processes = this.xmlData[elementNames.definitions.id]?.[elementNames.definitions.children[0]];
-        if (processes) {
-            const processArray = Array.isArray(processes) ? processes : [processes];
+        const processesData = this.xmlData[elementNames.definitions.id]?.[elementNames.definitions.children[0]];
+        if (processesData) {
+            const outputProc = [];
+            const processArray = Array.isArray(processesData) ? processesData : [processesData];
             for (const process of processArray) {
                 try {
                     const processBasicData = this.extractBasicData(process);
@@ -181,12 +253,20 @@ class IFlowParser {
                     const subProcesses = this.getSubProcesses(process);
                     processBasicData["subProcesses"] = subProcesses;
     
-                    processElements[processBasicData.id] = processBasicData;
+                    processElements.processes[processBasicData.id] = processBasicData;
                 } catch (error) {
                     console.log(error);
                 }
             };
         }
+
+        //get the participants
+        //get collaboration elements
+        const collaboration = this.xmlData[elementNames.definitions.id]?.["bpmn2:collaboration"];
+        processElements["participants"] = this.getParticipantElements(collaboration);
+
+        //get the message flows
+        processElements["messageFlows"] = this.getMessageFlows(collaboration);
 
         return processElements;
     }
