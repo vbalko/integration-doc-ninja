@@ -1,0 +1,214 @@
+flowchart LR
+  subgraph Process_98956[getSupervisonDistName]
+    direction LR
+    StartEvent_98957((Start 3))
+    EndEvent_98958((End 5))
+    CallActivity_1462497{{Log supervisor}}
+    CallActivity_1462484[/search by id\]
+    CallActivity_98969[/get params\]
+    CallActivity_1462388[/Set headers\]
+    CallActivity_1462487[/search by email\]
+    ExclusiveGateway_1462481{Is supervisorId filled?}
+    ServiceTask_98960[search]
+    StartEvent_98957 --> CallActivity_1462388
+    CallActivity_1462497 --> EndEvent_98958
+    ServiceTask_98960 --> CallActivity_98969
+    CallActivity_1462484 --> ServiceTask_98960
+    CallActivity_98969 --> CallActivity_1462497
+    CallActivity_1462388 --> ExclusiveGateway_1462481
+    CallActivity_1462487 --> ServiceTask_98960
+    ExclusiveGateway_1462481 -->|no|CallActivity_1462487
+    ExclusiveGateway_1462481 -->|yes|CallActivity_1462484
+  end
+  subgraph Process_1[Integration Process]
+    direction LR
+    StartEvent_1462603((Start 11))
+    EndEvent_1462386((End 9))
+    EndEvent_98990((End 6))
+    EndEvent_2((End))
+    CallActivity_22{{Log Input}}
+    CallActivity_98899{{Set bamboo properties and validation}}
+    CallActivity_13[[Iterating Splitter 1]]
+    CallActivity_9[/JSON to XML Converter 1/]
+    CallActivity_1462449[[Get location]]
+    CallActivity_1462428[[Process Ldap Create]]
+    CallActivity_1462419[[Process Ldap Change]]
+    CallActivity_98985[[Get supervisor from AD]]
+    CallActivity_1462404[[Get User From AD By Id]]
+    CallActivity_17[/Global Variables\]
+    CallActivity_4973[/Set bamboo xml properties\]
+    CallActivity_4975[/Parse AD User and Set Bamboo Body\]
+    ExclusiveGateway_4977{Is user found?}
+    ExclusiveGateway_1462383{Is record valid?}
+  subgraph SubProcess_213 [Exception Subprocess 1]
+    direction LR
+  end
+    CallActivity_22 --> CallActivity_9
+    CallActivity_98899 --> ExclusiveGateway_1462383
+    StartEvent_1462603 --> CallActivity_17
+    CallActivity_13 --> CallActivity_4973
+    CallActivity_9 --> CallActivity_13
+    CallActivity_1462449 --> ExclusiveGateway_4977
+    CallActivity_1462428 --> EndEvent_2
+    CallActivity_1462419 --> EndEvent_2
+    CallActivity_98985 --> CallActivity_1462404
+    CallActivity_1462404 --> CallActivity_4975
+    CallActivity_17 --> CallActivity_22
+    CallActivity_4973 --> CallActivity_98899
+    CallActivity_4975 --> CallActivity_1462449
+    ExclusiveGateway_4977 -->|User NOT found - Create|CallActivity_1462428
+    ExclusiveGateway_4977 -->|default|EndEvent_98990
+    ExclusiveGateway_4977 -->|User found - Change|CallActivity_1462419
+    ExclusiveGateway_1462383 -->|Not valid|EndEvent_1462386
+    ExclusiveGateway_1462383 -->|Valid|CallActivity_98985
+  end
+  subgraph Process_1462506[Add group to user]
+    direction LR
+    StartEvent_1462507((Start 10))
+    EndEvent_1462508((End 14))
+    CallActivity_1462528{{LOG}}
+    CallActivity_1462522{{Create valid XML body}}
+    CallActivity_1462520{{LOG response}}
+    CallActivity_1462513[[Iterating Splitter 2]]
+    ExclusiveGateway_1462540{Add to group?}
+    ServiceTask_1462517[ldap modify-add]
+    StartEvent_1462507 --> ExclusiveGateway_1462540
+    CallActivity_1462528 --> CallActivity_1462513
+    CallActivity_1462522 --> CallActivity_1462528
+    CallActivity_1462520 --> EndEvent_1462508
+    ServiceTask_1462517 --> CallActivity_1462520
+    CallActivity_1462513 --> ServiceTask_1462517
+    ExclusiveGateway_1462540 -->|no|EndEvent_1462508
+    ExclusiveGateway_1462540 -->|yes|CallActivity_1462522
+  end
+  subgraph Process_1462415[ProcessLdapChange]
+    direction LR
+    StartEvent_1462416((Start 6))
+    EndEvent_1462417((End 11))
+    CallActivity_1462439{{Mapping Change for test runs}}
+    CallActivity_4984{{Remove and filter nodes}}
+    CallActivity_1462479{{check if anything has changed}}
+    CallActivity_98893{{Log after send}}
+    CallActivity_4987{{Log before send}}
+    CallActivity_1462598{{Mapping Change}}
+    CallActivity_1462502[[Add groups to user]]
+    CallActivity_4990[/Change Variables\]
+    ExclusiveGateway_1462594{Is test run?}
+    ExclusiveGateway_1462544{Is user changed?}
+    ServiceTask_98892[ldap change]
+    StartEvent_1462416 --> CallActivity_4990
+    CallActivity_1462439 --> CallActivity_4984
+    CallActivity_4984 --> CallActivity_1462479
+    CallActivity_1462479 --> CallActivity_4987
+    CallActivity_98893 --> CallActivity_1462502
+    CallActivity_4987 --> ExclusiveGateway_1462544
+    CallActivity_1462598 --> CallActivity_4984
+    ServiceTask_98892 --> CallActivity_98893
+    CallActivity_1462502 --> EndEvent_1462417
+    CallActivity_4990 --> ExclusiveGateway_1462594
+    ExclusiveGateway_1462594 -->|no|CallActivity_1462598
+    ExclusiveGateway_1462594 -->|yes|CallActivity_1462439
+    ExclusiveGateway_1462544 -->|yes|ServiceTask_98892
+    ExclusiveGateway_1462544 -->|no|CallActivity_1462502
+  end
+  subgraph Process_1462424[ProcessLdapCreate]
+    direction LR
+    StartEvent_1462425((Start 7))
+    EndEvent_1462426((End 12))
+    CallActivity_98946{{Generate password}}
+    CallActivity_4999{{Remove empty nodes}}
+    CallActivity_98994{{Set email}}
+    CallActivity_98884{{Log after send}}
+    CallActivity_5002{{Log before send}}
+    CallActivity_1462435{{Mapping Create}}
+    CallActivity_1462586{{Mapping Create for test runs}}
+    CallActivity_98924[[Create email]]
+    CallActivity_1462526[[add groups to user]]
+    CallActivity_4993[/Create Variables\]
+    CallActivity_99004[/Set body bambooHR\]
+    CallActivity_1462553[/Clear headers\]
+    ExclusiveGateway_1462583{Is test run?}
+    ExclusiveGateway_1462589{Is test run?}
+    ServiceTask_98886[ldal create]
+    ServiceTask_1462548[activate user webhook]
+    ServiceTask_99007[update email]
+    ServiceTask_98996[Send 1]
+    StartEvent_1462425 --> CallActivity_4993
+    CallActivity_98946 --> CallActivity_98924
+    CallActivity_4999 --> CallActivity_5002
+    CallActivity_98994 --> ServiceTask_98996
+    CallActivity_98884 --> CallActivity_1462526
+    CallActivity_5002 --> ServiceTask_98886
+    CallActivity_1462435 --> CallActivity_4999
+    CallActivity_1462586 --> CallActivity_4999
+    CallActivity_98924 --> ExclusiveGateway_1462583
+    ServiceTask_98886 --> CallActivity_98884
+    ServiceTask_1462548 --> EndEvent_1462426
+    ServiceTask_99007 --> CallActivity_1462553
+    ServiceTask_98996 --> CallActivity_99004
+    CallActivity_1462526 --> CallActivity_98994
+    CallActivity_4993 --> CallActivity_98946
+    CallActivity_99004 --> ServiceTask_99007
+    CallActivity_1462553 --> ExclusiveGateway_1462589
+    ExclusiveGateway_1462583 -->|Yes|CallActivity_1462586
+    ExclusiveGateway_1462583 -->|no|CallActivity_1462435
+    ExclusiveGateway_1462589 -->|yes|EndEvent_1462426
+    ExclusiveGateway_1462589 -->|no|ServiceTask_1462548
+  end
+  subgraph Process_98901[createEmail]
+    direction LR
+    StartEvent_98902((Start 2))
+    EndEvent_98903((End 3))
+    CallActivity_98918{{Set Email, Name}}
+    CallActivity_98941{{Increment index}}
+    CallActivity_98938[/Set ldapEmail, ldapName\]
+    CallActivity_98933[/Parse search response\]
+    CallActivity_1462406[/Set headers\]
+    ExclusiveGateway_98935{Is email uniq?}
+    ServiceTask_98928[ldap search by email]
+    StartEvent_98902 --> CallActivity_98918
+    CallActivity_98918 --> CallActivity_1462406
+    CallActivity_98941 --> EndEvent_98903
+    ServiceTask_98928 --> CallActivity_98933
+    CallActivity_98938 --> EndEvent_98903
+    CallActivity_98933 --> ExclusiveGateway_98935
+    CallActivity_1462406 --> ServiceTask_98928
+    ExclusiveGateway_98935 -->|not uniq|CallActivity_98941
+    ExclusiveGateway_98935 -->|uniq|CallActivity_98938
+  end
+  subgraph Process_1462451[Get location from Sharepoint]
+    direction LR
+    StartEvent_1462452((Start 9))
+    EndEvent_1462453((End 13))
+    CallActivity_1462472{{Set email body}}
+    CallActivity_1462463{{Log Location}}
+    CallActivity_1462466{{Check response and set props}}
+    CallActivity_1462455[/Set filter\]
+    ExclusiveGateway_1462469{Is location found?}
+    ExclusiveGateway_1462490{Is location empty?}
+    ServiceTask_1462458[Get Location Info]
+    ServiceTask_1462474[Send 2]
+    StartEvent_1462452 --> ExclusiveGateway_1462490
+    CallActivity_1462472 --> ServiceTask_1462474
+    CallActivity_1462463 --> CallActivity_1462466
+    CallActivity_1462466 --> ExclusiveGateway_1462469
+    ServiceTask_1462458 --> CallActivity_1462463
+    ServiceTask_1462474 --> EndEvent_1462453
+    CallActivity_1462455 --> ServiceTask_1462458
+    ExclusiveGateway_1462469 -->|no|CallActivity_1462472
+    ExclusiveGateway_1462469 -->|yes|EndEvent_1462453
+    ExclusiveGateway_1462490 -->|yes|EndEvent_1462453
+    ExclusiveGateway_1462490 -->|no|CallActivity_1462455
+  end
+  subgraph Process_1462392[getUserFromAD]
+    direction LR
+    StartEvent_1462393((Start 5))
+    EndEvent_1462394((End 10))
+    CallActivity_1462494{{Log user from AD}}
+    CallActivity_1462396[/Set headers\]
+    ServiceTask_1462399[Search user]
+    StartEvent_1462393 --> CallActivity_1462396
+    CallActivity_1462494 --> EndEvent_1462394
+    ServiceTask_1462399 --> CallActivity_1462494
+    CallActivity_1462396 --> ServiceTask_1462399
+  end
