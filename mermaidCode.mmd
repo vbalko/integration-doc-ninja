@@ -1,13 +1,26 @@
 flowchart LR
+subgraph Legend
+  direction LR
+      legendEnricher[/Content Modifier\]:::classEnricher
+
+      legendJsonToXmlConverter[/Json to XML Converter/]:::classJsonToXmlConverter
+
+      legendProcessCallElement[[Process Call Element]]:::classProcessCallElement
+
+      legendScript{{Script}}:::classScript
+
+      legendSplitter[[Splitter]]:::classSplitter
+
+end
   subgraph Process_98956[getSupervisonDistName]
     direction LR
     StartEvent_98957((Start 3))
     EndEvent_98958((End 5))
-    CallActivity_1462497{{Log supervisor}}
-    CallActivity_1462484[/search by id\]
-    CallActivity_98969[/get params\]
-    CallActivity_1462388[/Set headers\]
-    CallActivity_1462487[/search by email\]
+    CallActivity_1462497{{Log supervisor}}:::classScript
+    CallActivity_1462484[/search by id\]:::classEnricher
+    CallActivity_98969[/get params\]:::classEnricher
+    CallActivity_1462388[/Set headers\]:::classEnricher
+    CallActivity_1462487[/search by email\]:::classEnricher
     ExclusiveGateway_1462481{Is supervisorId filled?}
     ServiceTask_98960[search]
     StartEvent_98957 --> CallActivity_1462388
@@ -26,21 +39,21 @@ flowchart LR
     EndEvent_1462386((End 9))
     EndEvent_98990((End 6))
     EndEvent_2((End))
-    CallActivity_22{{Log Input}}
-    CallActivity_98899{{Set bamboo properties and validation}}
-    CallActivity_13[[Iterating Splitter 1]]
-    CallActivity_9[/JSON to XML Converter 1/]
-    CallActivity_1462449[[Get location]]
-    CallActivity_1462428[[Process Ldap Create]]
-    CallActivity_1462419[[Process Ldap Change]]
-    CallActivity_98985[[Get supervisor from AD]]
-    CallActivity_1462404[[Get User From AD By Id]]
-    CallActivity_17[/Global Variables\]
-    CallActivity_4973[/Set bamboo xml properties\]
-    CallActivity_4975[/Parse AD User and Set Bamboo Body\]
+    CallActivity_22{{Log Input}}:::classScript
+    CallActivity_98899{{Set bamboo properties and validation}}:::classScript
+    CallActivity_13[[Iterating Splitter 1]]:::classSplitter
+    CallActivity_9[/JSON to XML Converter 1/]:::classJsonToXmlConverter
+    CallActivity_1462449[[Get location]]:::classProcessCallElement
+    CallActivity_1462428[[Process Ldap Create]]:::classProcessCallElement
+    CallActivity_1462419[[Process Ldap Change]]:::classProcessCallElement
+    CallActivity_98985[[Get supervisor from AD]]:::classProcessCallElement
+    CallActivity_1462404[[Get User From AD By Id]]:::classProcessCallElement
+    CallActivity_17[/Global Variables\]:::classEnricher
+    CallActivity_4973[/Set bamboo xml properties\]:::classEnricher
+    CallActivity_4975[/Parse AD User and Set Bamboo Body\]:::classEnricher
     ExclusiveGateway_4977{Is user found?}
     ExclusiveGateway_1462383{Is record valid?}
-  subgraph SubProcess_213 [Exception Subprocess 1]
+  subgraph SubProcess_213[Exception Subprocess 1]
     direction LR
   end
     CallActivity_22 --> CallActivity_9
@@ -66,10 +79,10 @@ flowchart LR
     direction LR
     StartEvent_1462507((Start 10))
     EndEvent_1462508((End 14))
-    CallActivity_1462528{{LOG}}
-    CallActivity_1462522{{Create valid XML body}}
-    CallActivity_1462520{{LOG response}}
-    CallActivity_1462513[[Iterating Splitter 2]]
+    CallActivity_1462528{{LOG}}:::classScript
+    CallActivity_1462522{{Create valid XML body}}:::classScript
+    CallActivity_1462520{{LOG response}}:::classScript
+    CallActivity_1462513[[Iterating Splitter 2]]:::classSplitter
     ExclusiveGateway_1462540{Add to group?}
     ServiceTask_1462517[ldap modify-add]
     StartEvent_1462507 --> ExclusiveGateway_1462540
@@ -85,14 +98,14 @@ flowchart LR
     direction LR
     StartEvent_1462416((Start 6))
     EndEvent_1462417((End 11))
-    CallActivity_1462439{{Mapping Change for test runs}}
-    CallActivity_4984{{Remove and filter nodes}}
-    CallActivity_1462479{{check if anything has changed}}
-    CallActivity_98893{{Log after send}}
-    CallActivity_4987{{Log before send}}
-    CallActivity_1462598{{Mapping Change}}
-    CallActivity_1462502[[Add groups to user]]
-    CallActivity_4990[/Change Variables\]
+    CallActivity_1462439{{Mapping Change for test runs}}:::classScript
+    CallActivity_4984{{Remove and filter nodes}}:::classScript
+    CallActivity_1462479{{check if anything has changed}}:::classScript
+    CallActivity_98893{{Log after send}}:::classScript
+    CallActivity_4987{{Log before send}}:::classScript
+    CallActivity_1462598{{Mapping Change}}:::classScript
+    CallActivity_1462502[[Add groups to user]]:::classProcessCallElement
+    CallActivity_4990[/Change Variables\]:::classEnricher
     ExclusiveGateway_1462594{Is test run?}
     ExclusiveGateway_1462544{Is user changed?}
     ServiceTask_98892[ldap change]
@@ -115,18 +128,18 @@ flowchart LR
     direction LR
     StartEvent_1462425((Start 7))
     EndEvent_1462426((End 12))
-    CallActivity_98946{{Generate password}}
-    CallActivity_4999{{Remove empty nodes}}
-    CallActivity_98994{{Set email}}
-    CallActivity_98884{{Log after send}}
-    CallActivity_5002{{Log before send}}
-    CallActivity_1462435{{Mapping Create}}
-    CallActivity_1462586{{Mapping Create for test runs}}
-    CallActivity_98924[[Create email]]
-    CallActivity_1462526[[add groups to user]]
-    CallActivity_4993[/Create Variables\]
-    CallActivity_99004[/Set body bambooHR\]
-    CallActivity_1462553[/Clear headers\]
+    CallActivity_98946{{Generate password}}:::classScript
+    CallActivity_4999{{Remove empty nodes}}:::classScript
+    CallActivity_98994{{Set email}}:::classScript
+    CallActivity_98884{{Log after send}}:::classScript
+    CallActivity_5002{{Log before send}}:::classScript
+    CallActivity_1462435{{Mapping Create}}:::classScript
+    CallActivity_1462586{{Mapping Create for test runs}}:::classScript
+    CallActivity_98924[[Create email]]:::classProcessCallElement
+    CallActivity_1462526[[add groups to user]]:::classProcessCallElement
+    CallActivity_4993[/Create Variables\]:::classEnricher
+    CallActivity_99004[/Set body bambooHR\]:::classEnricher
+    CallActivity_1462553[/Clear headers\]:::classEnricher
     ExclusiveGateway_1462583{Is test run?}
     ExclusiveGateway_1462589{Is test run?}
     ServiceTask_98886[ldal create]
@@ -159,11 +172,11 @@ flowchart LR
     direction LR
     StartEvent_98902((Start 2))
     EndEvent_98903((End 3))
-    CallActivity_98918{{Set Email, Name}}
-    CallActivity_98941{{Increment index}}
-    CallActivity_98938[/Set ldapEmail, ldapName\]
-    CallActivity_98933[/Parse search response\]
-    CallActivity_1462406[/Set headers\]
+    CallActivity_98918{{Set Email, Name}}:::classScript
+    CallActivity_98941{{Increment index}}:::classScript
+    CallActivity_98938[/Set ldapEmail, ldapName\]:::classEnricher
+    CallActivity_98933[/Parse search response\]:::classEnricher
+    CallActivity_1462406[/Set headers\]:::classEnricher
     ExclusiveGateway_98935{Is email uniq?}
     ServiceTask_98928[ldap search by email]
     StartEvent_98902 --> CallActivity_98918
@@ -180,10 +193,10 @@ flowchart LR
     direction LR
     StartEvent_1462452((Start 9))
     EndEvent_1462453((End 13))
-    CallActivity_1462472{{Set email body}}
-    CallActivity_1462463{{Log Location}}
-    CallActivity_1462466{{Check response and set props}}
-    CallActivity_1462455[/Set filter\]
+    CallActivity_1462472{{Set email body}}:::classScript
+    CallActivity_1462463{{Log Location}}:::classScript
+    CallActivity_1462466{{Check response and set props}}:::classScript
+    CallActivity_1462455[/Set filter\]:::classEnricher
     ExclusiveGateway_1462469{Is location found?}
     ExclusiveGateway_1462490{Is location empty?}
     ServiceTask_1462458[Get Location Info]
@@ -204,11 +217,18 @@ flowchart LR
     direction LR
     StartEvent_1462393((Start 5))
     EndEvent_1462394((End 10))
-    CallActivity_1462494{{Log user from AD}}
-    CallActivity_1462396[/Set headers\]
+    CallActivity_1462494{{Log user from AD}}:::classScript
+    CallActivity_1462396[/Set headers\]:::classEnricher
     ServiceTask_1462399[Search user]
     StartEvent_1462393 --> CallActivity_1462396
     CallActivity_1462494 --> EndEvent_1462394
     ServiceTask_1462399 --> CallActivity_1462494
     CallActivity_1462396 --> ServiceTask_1462399
   end
+
+classDef classSplitter stroke:#000,fill:#FFDAB9;
+classDef classScript stroke:#000,fill:#FFC0CB;
+classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;
+classDef classProcessCallElement stroke:#000,fill:#B0E0E6;
+classDef classEnricher stroke:#000,fill:#FFB6C1;
+style Process_1 fill:#E0FFFF,stroke:#000;

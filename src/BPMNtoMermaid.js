@@ -3,6 +3,13 @@ class BPMNtoMermaid {
     this.json = json;
   }
 
+  getRandomPastelColor() {
+    const hue = Math.floor(Math.random() * 360);
+    const pastelSaturation = Math.floor(Math.random() * 30) + 70; // Saturation between 70 and 100 (pastel range)
+    const pastelLightness = Math.floor(Math.random() * 30) + 50; // Lightness between 50 and 80 (pastel range)
+    return `hsl(${hue}, ${pastelSaturation}%, ${pastelLightness}%)`;
+  }
+
   shapeModifier(text, shape) {
     const shapeMap = {
       'round': `(${text})`,
@@ -21,8 +28,13 @@ class BPMNtoMermaid {
     return shapeMap[shape] || text;
   }
 
-  showElement(elementId, elementName, shape) {
-    return `    ${elementId}${this.shapeModifier(elementName, shape)}\n`;
+  showElement(elementId, elementName, shape, classRef=null) {
+    //if classRef is null, then dont use it
+    if (classRef===null) {
+      return `    ${elementId}${this.shapeModifier(elementName, shape)}\n`;
+    }
+    //else use it
+    return `    ${elementId}${this.shapeModifier(elementName, shape)}:::${classRef}\n`;
   }
 
   showStartEvent(startEvent) {
@@ -40,8 +52,9 @@ class BPMNtoMermaid {
   showCallActivity(event) {
     const eventId = event.id;
     const activityType = event.activityType;
-    //for each activity type, show a different shape
     let shape = 'stadium';
+    let fillColor = '#E0FFFF'; // Default pastel color
+
     switch (activityType) {
       case 'Splitter':
         shape = 'subroutine';
@@ -52,17 +65,19 @@ class BPMNtoMermaid {
       case 'JsonToXmlConverter':
         shape = 'parallelogram';
         break;
-        case 'ProcessCallElement':
-          shape = 'subroutine';
-          break;  
-          case 'Enricher':
-            shape = 'trapezoid';
-            break;                
+      case 'ProcessCallElement':
+        shape = 'subroutine';
+        break;
+      case 'Enricher':
+        shape = 'trapezoid';
+        break;
       default:
     }
-    const eventName = this.showElement(eventId, event.name, shape);
 
-    return eventName;
+    const classRef = `class${activityType}`;
+    const eventName = this.showElement(eventId, event.name, shape,classRef);
+
+    return `${eventName}`;
   }
 
   showExclusiveGateway(gateway) {
@@ -73,10 +88,9 @@ class BPMNtoMermaid {
 
   showSubProcess(subProcess) {
     const subProcessId = subProcess.id;
-    //const subProcessName = this.showElement(subProcessId, subProcess.name, 'subroutine');
     const subProcessName = subProcess.name;
 
-    let subProcessCode = `  subgraph ${subProcessId} [${subProcessName}]\n`;
+    let subProcessCode = `  subgraph ${subProcessId}[${subProcessName}]\n`;
     subProcessCode += '    direction LR\n'; // Set subgraph orientation to LR using "direction"
 
     if (subProcess.startEvent) {
@@ -120,8 +134,22 @@ class BPMNtoMermaid {
     }
   }
 
+  addLegend() {
+    let legend = `subgraph Legend\n`;
+    legend += `  direction LR\n`;
+    legend += `  ${this.showElement('legendEnricher','Content Modifier','trapezoid','classEnricher')}\n`;
+    legend += `  ${this.showElement('legendJsonToXmlConverter','Json to XML Converter','parallelogram','classJsonToXmlConverter')}\n`;
+    legend += `  ${this.showElement('legendProcessCallElement','Process Call Element','subroutine','classProcessCallElement')}\n`;
+    legend += `  ${this.showElement('legendScript','Script','hexagon','classScript')}\n`;
+    legend += `  ${this.showElement('legendSplitter','Splitter','subroutine','classSplitter')}\n`;
+    legend += `end\n`;
+    return legend;
+  }
+
+
   convertToMermaid() {
     let mermaidCode = 'flowchart LR\n';
+    mermaidCode += this.addLegend();
 
     Object.values(this.json).forEach((process) => {
       const processId = process.id;
@@ -144,9 +172,10 @@ class BPMNtoMermaid {
 
       if (process.callActivity) {
         process.callActivity.forEach((event) => {
-          mermaidCode += this.showCallActivity(event);
+          const callActivityCode = this.showCallActivity(event);
+          mermaidCode += callActivityCode;
         });
-      }      
+      }
 
       if (process.exclusiveGateway) {
         process.exclusiveGateway.forEach((gateway) => {
@@ -180,6 +209,17 @@ class BPMNtoMermaid {
 
       mermaidCode += '  end\n'; // Close the subgraph
     });
+
+    mermaidCode += '\n'; // Newline after the flowchart
+
+    // Define classes for each call activity type
+    mermaidCode += `classDef classSplitter stroke:#000,fill:#FFDAB9;
+classDef classScript stroke:#000,fill:#FFC0CB;
+classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;
+classDef classProcessCallElement stroke:#000,fill:#B0E0E6;
+classDef classEnricher stroke:#000,fill:#FFB6C1;
+style Process_1 fill:#E0FFFF,stroke:#000;
+`;
 
     return mermaidCode;
   }
