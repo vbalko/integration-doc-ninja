@@ -6,14 +6,19 @@ const attributePaths = {
 
 const elementNames = {
     definitions: {id:"bpmn2:definitions",children:["bpmn2:process"]},
-    process: {id:"bpmn2:process",children:["startEvent","endEvent","exclusiveGateway","subProcess","serviceTask","participant","callActivity"]},
+    process: {id:"bpmn2:process",children:["startEvent","endEvent","exclusiveGateway","serviceTask","participant","callActivity"]},
     startEvent: {id:"bpmn2:startEvent",children:[]},
     endEvent: {id:"bpmn2:endEvent",children:[]},
     exclusiveGateway: {id:"bpmn2:exclusiveGateway",children:[]},
-    subProcess: {id:"bpmn2:subProcess",children:[]},
+ //   subProcess: {id:"bpmn2:subProcess",children:[]},
     serviceTask: {id:"bpmn2:serviceTask",children:[]},
     participant: {id:"bpmn2:participant",children:[]},
     callActivity: {id:"bpmn2:callActivity",children:[], type:""}
+}
+
+const exceptionSubProcess = {
+    id: "bpmn2:subProcess",
+    children: ["startEvent","endEvent","exclusiveGateway","serviceTask","participant","callActivity"]
 }
 
 class IFlowParser {
@@ -46,9 +51,6 @@ class IFlowParser {
         }
         return "";
     }
-
-
-
 
     //extract the basic data from the xml
     extractBasicData(bpmnElement) {
@@ -111,6 +113,47 @@ class IFlowParser {
         }
     }
 
+    //get subprocesses
+    getSubProcesses(inputXML) {
+        const subProcesses = [];
+        const subProcessesRecords = inputXML["bpmn2:subProcess"];
+        if (subProcessesRecords) {
+            const subProcessArray = Array.isArray(subProcessesRecords) ? subProcessesRecords : [subProcessesRecords];
+            for (const subProcess of subProcessArray) {
+                const basicData = this.extractBasicData(subProcess);
+                basicData.type = "bpmn2:subProcess"; // Add the type of element
+
+
+                //get subprocess activity type
+                const type = this.getPropertyActivityType(subProcess);
+
+                //if activity type is exception then get the elements from the exception subprocess
+                if (type === "ErrorEventSubProcessTemplate") {
+                    for (const child of exceptionSubProcess.children) {
+                        const childElements = this.getElementsByType(subProcess, child);
+                        basicData[child] = childElements;
+                    }
+                } else {
+                    //get child elements loop through the children and get the elements
+                    for (const child of elementNames.process.children) {
+                        const childElements = this.getElementsByType(subProcess, child);
+                        basicData[child] = childElements;
+                    }
+                }
+
+                //get the sequence flows
+                const sequenceFlows = this.getSequenceFlows(subProcess);
+                basicData["sequenceFlows"] = sequenceFlows;
+                
+                subProcesses.push(basicData);
+
+            }
+            return subProcesses;
+        } else {
+            return [];
+        }
+    }
+
     //get the process elements from the xml
     getProcessElements() {
         const processElements = {};
@@ -121,19 +164,27 @@ class IFlowParser {
         if (processes) {
             const processArray = Array.isArray(processes) ? processes : [processes];
             for (const process of processArray) {
-                const processBasicData = this.extractBasicData(process);
-
-                //get child elements loop through the children and get the elements
-                for (const child of processElement.children) {
-                    const childElements = this.getElementsByType(process,child);
-                    processBasicData[child] = childElements;
+                try {
+                    const processBasicData = this.extractBasicData(process);
+                
+                    //get child elements loop through the children and get the elements
+                    for (const child of processElement.children) {
+                        const childElements = this.getElementsByType(process,child);
+                        processBasicData[child] = childElements;
+                    }
+    
+                    //get the sequence flows
+                    const sequenceFlows = this.getSequenceFlows(process);
+                    processBasicData["sequenceFlows"] = sequenceFlows;
+    
+                    //get the sub processes
+                    const subProcesses = this.getSubProcesses(process);
+                    processBasicData["subProcesses"] = subProcesses;
+    
+                    processElements[processBasicData.id] = processBasicData;
+                } catch (error) {
+                    console.log(error);
                 }
-
-                //get the sequence flows
-                const sequenceFlows = this.getSequenceFlows(process);
-                processBasicData["sequenceFlows"] = sequenceFlows;
-
-                processElements[processBasicData.id] = processBasicData;
             };
         }
 

@@ -55,6 +55,11 @@ end
     ExclusiveGateway_1462383{Is record valid?}
   subgraph SubProcess_213[Exception Subprocess 1]
     direction LR
+    StartEvent_214((Error Start 1))
+    EndEvent_98952((End 4))
+    CallActivity_219{{Log exception}}:::classScript
+    CallActivity_219 --> EndEvent_98952
+    StartEvent_214 --> CallActivity_219
   end
     CallActivity_22 --> CallActivity_9
     CallActivity_98899 --> ExclusiveGateway_1462383

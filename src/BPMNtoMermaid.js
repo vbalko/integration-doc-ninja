@@ -99,9 +99,40 @@ class BPMNtoMermaid {
       });
     }
 
+    if (subProcess.endEvent) {
+      subProcess.endEvent.forEach((endEvent) => {
+        subProcessCode += this.showEndEvent(endEvent);
+      });
+    }
+
     if (subProcess.callActivity) {
-      subProcess.callActivity.forEach((callActivity) => {
-        subProcessCode += this.showCallActivity(callActivity);
+      subProcess.callActivity.forEach((event) => {
+        const callActivityCode = this.showCallActivity(event);
+        subProcessCode += callActivityCode;
+      });
+    }
+
+    if (subProcess.exclusiveGateway) {
+      subProcess.exclusiveGateway.forEach((gateway) => {
+        subProcessCode += this.showExclusiveGateway(gateway);
+      });
+    }
+
+    if (subProcess.serviceTask) {
+      subProcess.serviceTask.forEach((serviceTask) => {
+        subProcessCode += this.showServiceTask(serviceTask);
+      });
+    }
+
+    if (subProcess.participant) {
+      subProcess.participant.forEach((participant) => {
+        subProcessCode += this.showParticipant(participant);
+      });
+    }
+
+    if (subProcess.sequenceFlows) {
+      subProcess.sequenceFlows.forEach((sequenceFlow) => {
+        subProcessCode += this.showSequenceFlow(sequenceFlow);
       });
     }
 
@@ -183,8 +214,8 @@ class BPMNtoMermaid {
         });
       }
 
-      if (process.subProcess) {
-        process.subProcess.forEach((subProcess) => {
+      if (process.subProcesses) {
+        process.subProcesses.forEach((subProcess) => {
           mermaidCode += this.showSubProcess(subProcess);
         });
       }
