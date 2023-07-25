@@ -3,91 +3,54 @@
 const utils = require("./utils.js");
 const IFlowParser = require("./iflowParser.js");
 const ZipArchiveProcessing = require("./ZipArchiveProcessing.js");
+const SapApi = require("./SAPApiProcessing.js");
 const MermaidConverter = require("./BPMNtoMermaid.js");
 
-
-
-
-// // Function to extract basic data from a BPMN element
-// function extractBasicData(bpmnElement) {
-//   const basicData = {};
-
-//   // Get the element ID from the 'id' property
-//   if (bpmnElement["id"]) {
-//     basicData.id = bpmnElement.id.value;
-//   }
-
-//   // Get the element name from the 'name' property
-//   if (bpmnElement.name && bpmnElement.name["value"]) {
-//     basicData.name = bpmnElement.name["value"];
-//   }
-
-//   // Add more properties as needed, e.g., type, description, etc.
-
-//   return basicData;
-// }
-
-// Function to list all process elements from a parsed BPMN XML
-function listProcessElements(parsedXML) {
-  const processElements = {};
-
-  // Get all process elements from the parsed XML
-  const processes = parsedXML["bpmn2:definitions"]?.["bpmn2:process"];
-  if (processes) {
-    const processArray = Array.isArray(processes) ? processes : [processes];
-    for (const process of processArray) {
-      const tasks = process["bpmn2:task"] || [];
-      const gateways = process["bpmn2:exclusiveGateway"]
-        ? [process["bpmn2:exclusiveGateway"]]
-        : [];
-      const events = process["bpmn2:event"] || [];
-
-      const processBasicData = extractBasicData(process);
-      processBasicData.tasks = [];
-      processBasicData.gateways = [];
-      processBasicData.events = [];
-
-      // Extract basic data for each task
-      for (const task of tasks) {
-        const basicData = extractBasicData(task);
-        basicData.type = "Task"; // Add the type of element
-        processBasicData.tasks.push(basicData);
-      }
-
-      // Extract basic data for each gateway
-      for (const gateway of gateways) {
-        const basicData = extractBasicData(gateway);
-        basicData.type = "Gateway"; // Add the type of element
-        processBasicData.gateways.push(basicData);
-      }
-
-      // Extract basic data for each event
-      for (const event of events) {
-        const basicData = extractBasicData(event);
-        basicData.type = "Event"; // Add the type of element
-        processBasicData.events.push(basicData);
-      }
-
-      processElements[processBasicData.id] = {
-        name: processBasicData.name,
-        processInfo: processBasicData,
-      };
+//function to prepare zip archive
+async function prepareZipArchive() {
+  //get the iflow id from the command line
+  const iflowId = process.argv[2] || 'Bamboo_AD_UserUpsert_PROD';
+  if (!iflowId) {
+    console.log("Please provide the iFlow ID as a command line argument.");
+    return false;
+  }
+  //check if iflow zip file is downloaded
+  const isZipFileDownloaded = await utils.zipFileDownloaded(iflowId);
+  if (isZipFileDownloaded) {
+    return true;
+  } else {
+    //log that zip is going to be downloaded
+    console.log(`Downloading zip file for iFlow ${iflowId}...`);
+    //download the zip file
+    const sapApi = new SapApi();
+    const isZipFileDownloaded = await sapApi.downloadZipFile(iflowId);
+    if (isZipFileDownloaded) {
+      return true;
+    } else {
+      return false;
     }
   }
-
-  return processElements;
 }
+
+
 
 // Main function to read the zip file and process the iFlow
 async function main() {
   try {
-    //download the zip file from sap api hub
-    // await utils.downloadZipFile("Bamboo_AD_UserUpsert_PROD", "active");
+
+    //delete all zip files in the current directory
+    await utils.deleteZipFiles();
+
+    //prepare the zip archive
+    const isZipFileDownloaded = await prepareZipArchive();
+    if (!isZipFileDownloaded) {
+      return false;
+    }
 
     //create zip archive processing object
     const zip = new ZipArchiveProcessing();
     //read the zip file
-    await zip.readZipFile("iflow.zip");
+    await zip.readZipFile();
 
     //get the iflow from the zip archive
     const { data, name } = await zip.getIflowFromZipArchive();

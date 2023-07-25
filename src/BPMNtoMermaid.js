@@ -48,7 +48,7 @@ class BPMNtoMermaid {
     //if participantType is IntegrationProcess, then dont show it
     if (participantType === "IntegrationProcess") {
       return "";
-    };
+    }
 
     return this.showElement(participantId, participantName, "cylindrical");
   }
@@ -185,15 +185,23 @@ class BPMNtoMermaid {
   // }
 
   showSequenceFlow(sequenceFlow) {
+    let ret = "";
     const sourceRef = sequenceFlow.sourceRef;
     const targetRef = sequenceFlow.targetRef;
     // if linkText is empty, use the sourceRef and targetRef
     const linkText = sequenceFlow.name || "";
+    const addressResolved = sequenceFlow.addressResolved || "";
+    const name = sequenceFlow.name || "";
+
+    ret += `    %% Protocol: ${name}\n`;
+    ret += `    %% Address: ${addressResolved}\n`;
+
     if (!linkText) {
-      return `    ${sourceRef} --> ${targetRef}\n`;
+      ret += `    ${sourceRef} --> ${targetRef}\n`;
     } else {
-      return `    ${sourceRef} -->|${linkText}|${targetRef}\n`;
+      ret += `    ${sourceRef} -->|${linkText}|${targetRef}\n`;
     }
+    return ret;
   }
 
   addLegend() {

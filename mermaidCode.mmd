@@ -44,17 +44,41 @@ end
 %% PARTICIPANT createEmail
 %% PARTICIPANT Get location from Sharepoint
 %% PARTICIPANT getUserFromAD
+    %% Protocol: ProcessDirect
+    %% Address: /lb_ldap_modify_add_prod
     ServiceTask_1462517 -->|ProcessDirect|Participant_1462516
+    %% Protocol: ProcessDirect
+    %% Address: /lb_ldap_search_prod
     ServiceTask_1462399 -->|ProcessDirect|Participant_1462402
+    %% Protocol: Mail
+    %% Address: smtp.sendgrid.net:587
     ServiceTask_1462474 -->|Mail|Participant_1462475
+    %% Protocol: Mail
+    %% Address: smtp.sendgrid.net:587
     ServiceTask_98996 -->|Mail|Participant_98999
+    %% Protocol: ProcessDirect
+    %% Address: /lb_ldap_search_prod
     ServiceTask_98928 -->|ProcessDirect|Participant_98931
+    %% Protocol: HTTP
+    %% Address: 
     ServiceTask_99007 -->|HTTP|Participant_99010
+    %% Protocol: ProcessDirect
+    %% Address: /bambooADupsertPROD
     Participant_98950 -->|ProcessDirect|StartEvent_1462603
+    %% Protocol: ProcessDirect
+    %% Address: /lb_ldap_insert_prod
     ServiceTask_98886 -->|ProcessDirect|Participant_98890
+    %% Protocol: ProcessDirect
+    %% Address: /lb_ldap_modify_prod
     ServiceTask_98892 -->|ProcessDirect|Participant_98897
+    %% Protocol: ProcessDirect
+    %% Address: /lb_ldap_search_prod
     ServiceTask_98960 -->|ProcessDirect|Participant_98963
+    %% Protocol: HTTP
+    %% Address: https://525f73e9-df61-4fff-8f59-8f96f04bafc0.webhook.ne.azure-automation.net/webhooks
     ServiceTask_1462548 -->|HTTP|Participant_1462551
+    %% Protocol: HTTP
+    %% Address: 
     ServiceTask_1462458 -->|HTTP|Participant_1462461
   subgraph Process_98956[getSupervisonDistName]
     direction LR
@@ -67,14 +91,32 @@ end
     CallActivity_1462487[/search by email\]:::classEnricher
     ExclusiveGateway_1462481{Is supervisorId filled?}
     ServiceTask_98960[search]
+    %% Protocol: 
+    %% Address: 
     StartEvent_98957 --> CallActivity_1462388
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462497 --> EndEvent_98958
+    %% Protocol: 
+    %% Address: 
     ServiceTask_98960 --> CallActivity_98969
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462484 --> ServiceTask_98960
+    %% Protocol: 
+    %% Address: 
     CallActivity_98969 --> CallActivity_1462497
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462388 --> ExclusiveGateway_1462481
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462487 --> ServiceTask_98960
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462481 -->|no|CallActivity_1462487
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462481 -->|yes|CallActivity_1462484
   end
   subgraph Process_1[Integration Process]
@@ -102,26 +144,66 @@ end
     StartEvent_214((Error Start 1))
     EndEvent_98952((End 4))
     CallActivity_219{{Log exception}}:::classScript
+    %% Protocol: 
+    %% Address: 
     CallActivity_219 --> EndEvent_98952
+    %% Protocol: 
+    %% Address: 
     StartEvent_214 --> CallActivity_219
   end
+    %% Protocol: 
+    %% Address: 
     CallActivity_22 --> CallActivity_9
+    %% Protocol: 
+    %% Address: 
     CallActivity_98899 --> ExclusiveGateway_1462383
+    %% Protocol: 
+    %% Address: 
     StartEvent_1462603 --> CallActivity_17
+    %% Protocol: 
+    %% Address: 
     CallActivity_13 --> CallActivity_4973
+    %% Protocol: 
+    %% Address: 
     CallActivity_9 --> CallActivity_13
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462449 --> ExclusiveGateway_4977
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462428 --> EndEvent_2
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462419 --> EndEvent_2
+    %% Protocol: 
+    %% Address: 
     CallActivity_98985 --> CallActivity_1462404
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462404 --> CallActivity_4975
+    %% Protocol: 
+    %% Address: 
     CallActivity_17 --> CallActivity_22
+    %% Protocol: 
+    %% Address: 
     CallActivity_4973 --> CallActivity_98899
+    %% Protocol: 
+    %% Address: 
     CallActivity_4975 --> CallActivity_1462449
+    %% Protocol: User NOT found - Create
+    %% Address: 
     ExclusiveGateway_4977 -->|User NOT found - Create|CallActivity_1462428
+    %% Protocol: default
+    %% Address: 
     ExclusiveGateway_4977 -->|default|EndEvent_98990
+    %% Protocol: User found - Change
+    %% Address: 
     ExclusiveGateway_4977 -->|User found - Change|CallActivity_1462419
+    %% Protocol: Not valid
+    %% Address: 
     ExclusiveGateway_1462383 -->|Not valid|EndEvent_1462386
+    %% Protocol: Valid
+    %% Address: 
     ExclusiveGateway_1462383 -->|Valid|CallActivity_98985
   end
   subgraph Process_1462506[Add group to user]
@@ -134,13 +216,29 @@ end
     CallActivity_1462513[[Iterating Splitter 2]]:::classSplitter
     ExclusiveGateway_1462540{Add to group?}
     ServiceTask_1462517[ldap modify-add]
+    %% Protocol: 
+    %% Address: 
     StartEvent_1462507 --> ExclusiveGateway_1462540
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462528 --> CallActivity_1462513
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462522 --> CallActivity_1462528
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462520 --> EndEvent_1462508
+    %% Protocol: 
+    %% Address: 
     ServiceTask_1462517 --> CallActivity_1462520
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462513 --> ServiceTask_1462517
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462540 -->|no|EndEvent_1462508
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462540 -->|yes|CallActivity_1462522
   end
   subgraph Process_1462415[ProcessLdapChange]
@@ -158,19 +256,47 @@ end
     ExclusiveGateway_1462594{Is test run?}
     ExclusiveGateway_1462544{Is user changed?}
     ServiceTask_98892[ldap change]
+    %% Protocol: 
+    %% Address: 
     StartEvent_1462416 --> CallActivity_4990
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462439 --> CallActivity_4984
+    %% Protocol: 
+    %% Address: 
     CallActivity_4984 --> CallActivity_1462479
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462479 --> CallActivity_4987
+    %% Protocol: 
+    %% Address: 
     CallActivity_98893 --> CallActivity_1462502
+    %% Protocol: 
+    %% Address: 
     CallActivity_4987 --> ExclusiveGateway_1462544
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462598 --> CallActivity_4984
+    %% Protocol: 
+    %% Address: 
     ServiceTask_98892 --> CallActivity_98893
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462502 --> EndEvent_1462417
+    %% Protocol: 
+    %% Address: 
     CallActivity_4990 --> ExclusiveGateway_1462594
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462594 -->|no|CallActivity_1462598
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462594 -->|yes|CallActivity_1462439
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462544 -->|yes|ServiceTask_98892
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462544 -->|no|CallActivity_1462502
   end
   subgraph Process_1462424[ProcessLdapCreate]
@@ -195,26 +321,68 @@ end
     ServiceTask_1462548[activate user webhook]
     ServiceTask_99007[update email]
     ServiceTask_98996[Send 1]
+    %% Protocol: 
+    %% Address: 
     StartEvent_1462425 --> CallActivity_4993
+    %% Protocol: 
+    %% Address: 
     CallActivity_98946 --> CallActivity_98924
+    %% Protocol: 
+    %% Address: 
     CallActivity_4999 --> CallActivity_5002
+    %% Protocol: 
+    %% Address: 
     CallActivity_98994 --> ServiceTask_98996
+    %% Protocol: 
+    %% Address: 
     CallActivity_98884 --> CallActivity_1462526
+    %% Protocol: 
+    %% Address: 
     CallActivity_5002 --> ServiceTask_98886
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462435 --> CallActivity_4999
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462586 --> CallActivity_4999
+    %% Protocol: 
+    %% Address: 
     CallActivity_98924 --> ExclusiveGateway_1462583
+    %% Protocol: 
+    %% Address: 
     ServiceTask_98886 --> CallActivity_98884
+    %% Protocol: 
+    %% Address: 
     ServiceTask_1462548 --> EndEvent_1462426
+    %% Protocol: 
+    %% Address: 
     ServiceTask_99007 --> CallActivity_1462553
+    %% Protocol: 
+    %% Address: 
     ServiceTask_98996 --> CallActivity_99004
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462526 --> CallActivity_98994
+    %% Protocol: 
+    %% Address: 
     CallActivity_4993 --> CallActivity_98946
+    %% Protocol: 
+    %% Address: 
     CallActivity_99004 --> ServiceTask_99007
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462553 --> ExclusiveGateway_1462589
+    %% Protocol: Yes
+    %% Address: 
     ExclusiveGateway_1462583 -->|Yes|CallActivity_1462586
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462583 -->|no|CallActivity_1462435
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462589 -->|yes|EndEvent_1462426
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462589 -->|no|ServiceTask_1462548
   end
   subgraph Process_98901[createEmail]
@@ -228,14 +396,32 @@ end
     CallActivity_1462406[/Set headers\]:::classEnricher
     ExclusiveGateway_98935{Is email uniq?}
     ServiceTask_98928[ldap search by email]
+    %% Protocol: 
+    %% Address: 
     StartEvent_98902 --> CallActivity_98918
+    %% Protocol: 
+    %% Address: 
     CallActivity_98918 --> CallActivity_1462406
+    %% Protocol: 
+    %% Address: 
     CallActivity_98941 --> EndEvent_98903
+    %% Protocol: 
+    %% Address: 
     ServiceTask_98928 --> CallActivity_98933
+    %% Protocol: 
+    %% Address: 
     CallActivity_98938 --> EndEvent_98903
+    %% Protocol: 
+    %% Address: 
     CallActivity_98933 --> ExclusiveGateway_98935
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462406 --> ServiceTask_98928
+    %% Protocol: not uniq
+    %% Address: 
     ExclusiveGateway_98935 -->|not uniq|CallActivity_98941
+    %% Protocol: uniq
+    %% Address: 
     ExclusiveGateway_98935 -->|uniq|CallActivity_98938
   end
   subgraph Process_1462451[Get location from Sharepoint]
@@ -250,16 +436,38 @@ end
     ExclusiveGateway_1462490{Is location empty?}
     ServiceTask_1462458[Get Location Info]
     ServiceTask_1462474[Send 2]
+    %% Protocol: 
+    %% Address: 
     StartEvent_1462452 --> ExclusiveGateway_1462490
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462472 --> ServiceTask_1462474
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462463 --> CallActivity_1462466
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462466 --> ExclusiveGateway_1462469
+    %% Protocol: 
+    %% Address: 
     ServiceTask_1462458 --> CallActivity_1462463
+    %% Protocol: 
+    %% Address: 
     ServiceTask_1462474 --> EndEvent_1462453
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462455 --> ServiceTask_1462458
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462469 -->|no|CallActivity_1462472
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462469 -->|yes|EndEvent_1462453
+    %% Protocol: yes
+    %% Address: 
     ExclusiveGateway_1462490 -->|yes|EndEvent_1462453
+    %% Protocol: no
+    %% Address: 
     ExclusiveGateway_1462490 -->|no|CallActivity_1462455
   end
   subgraph Process_1462392[getUserFromAD]
@@ -269,9 +477,17 @@ end
     CallActivity_1462494{{Log user from AD}}:::classScript
     CallActivity_1462396[/Set headers\]:::classEnricher
     ServiceTask_1462399[Search user]
+    %% Protocol: 
+    %% Address: 
     StartEvent_1462393 --> CallActivity_1462396
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462494 --> EndEvent_1462394
+    %% Protocol: 
+    %% Address: 
     ServiceTask_1462399 --> CallActivity_1462494
+    %% Protocol: 
+    %% Address: 
     CallActivity_1462396 --> ServiceTask_1462399
   end
 

@@ -1,4 +1,5 @@
 const utils = require("./utils.js");
+
 //class for parsing the iflow xml which is standard bpmn 2.0 xml format with extensions for iflow
 const attributePaths = {
     id: ["id", "value"],
@@ -158,8 +159,11 @@ class IFlowParser {
                 basicData.targetRef = messageFlow["targetRef"].value;
                 basicData.type = "bpmn2:messageFlow"; // Add the type of element
                 //remove {{ and }} from the parameter
-                basicData.addressRef = this.getPropertyByName(messageFlow, "address").replace("{{", "").replace("}}", "");
-                basicData.addressResolved = await this.getConfigurationParameterByName(basicData.addressRef);
+                // basicData.addressRef = this.getPropertyByName(messageFlow, "address").replace("{{", "").replace("}}", "");
+                // basicData.addressResolved = await this.getConfigurationParameterByName(basicData.addressRef);
+                const address = await this.getMessageFlowAddress(basicData.name,messageFlow);
+                basicData.addressRef = address.addressRef;
+                basicData.addressResolved = address.addressResolved;
                 messageFlows.push(basicData);
             }
             return messageFlows;
@@ -167,6 +171,31 @@ class IFlowParser {
             return [];
         }
     }
+
+    async getMessageFlowAddress(type,messageFlow) {
+        const ret = {
+            addressRef: "",
+            addressResolved: ""
+        }
+        //switch based on the type
+        switch (type) {
+            case "ProcessDirect":
+                ret.addressRef = this.getPropertyByName(messageFlow, "address").replace("{{", "").replace("}}", "");
+                ret.addressResolved = await this.getConfigurationParameterByName(ret.addressRef);
+                break;
+            case "Mail":
+                ret.addressRef = this.getPropertyByName(messageFlow, "server").replace("{{", "").replace("}}", "");
+                ret.addressResolved = await this.getConfigurationParameterByName(ret.addressRef);
+                break;
+            case "HTTP":
+                ret.addressRef = this.getPropertyByName(messageFlow, "httpAddressWithoutQuery").replace("{{", "").replace("}}", "");
+                ret.addressResolved = await this.getConfigurationParameterByName(ret.addressRef);
+                break;
+            default:
+        }
+        return ret;
+    }
+
 
     //get elemnents by type
     getElementsByType(inputXML, type) {
