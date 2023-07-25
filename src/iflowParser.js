@@ -1,3 +1,4 @@
+const utils = require("./utils.js");
 //class for parsing the iflow xml which is standard bpmn 2.0 xml format with extensions for iflow
 const attributePaths = {
     id: ["id", "value"],
@@ -24,6 +25,36 @@ const exceptionSubProcess = {
 class IFlowParser {
     constructor(xmlData) {
         this.xmlData = xmlData;
+        this.configurationParameters = {};
+        this.iflowId = "";
+    }
+
+    //set the iflow id
+    setIflowId(iflowId) {
+        this.iflowId = iflowId;
+    }
+
+    //get the configuration parameters - read them from api if not already read
+    async getConfigurationParameters(Version = "active") {
+        //if the configuration parameters are not already read, then read them from api hub
+        if (Object.keys(this.configurationParameters).length === 0) {
+            //get the configuration parameters
+            this.configurationParameters = await utils.getConfigurationParameters(this.iflowId, Version);
+        }
+        return this.configurationParameters;
+    }
+
+    //get configuration parameter by name
+    async getConfigurationParameterByName(parameterName, Version = "active") {
+        //get the configuration parameters
+        const configurationParameters = await this.getConfigurationParameters(Version);
+        //get the parameter
+        const parameter = configurationParameters.filter((parameter) => parameter["ParameterKey"] === parameterName);
+        if (parameter.length > 0) {
+            return parameter[0]["ParameterValue"];
+        } else {
+            return "";
+        }
     }
 
     //set the xml data
@@ -114,7 +145,7 @@ class IFlowParser {
     }
 
     //get message flows
-    getMessageFlows(inputXML) {
+    async getMessageFlows(inputXML) {
         const messageFlows = [];
         const messageFlowsRecords = inputXML["bpmn2:messageFlow"];
         if (messageFlowsRecords) {
@@ -126,8 +157,9 @@ class IFlowParser {
                 basicData.sourceRef = messageFlow["sourceRef"].value;
                 basicData.targetRef = messageFlow["targetRef"].value;
                 basicData.type = "bpmn2:messageFlow"; // Add the type of element
-                basicData.addressRef = this.getPropertyByName(messageFlow, "address");
-                basicData.addressResolved = "";
+                //remove {{ and }} from the parameter
+                basicData.addressRef = this.getPropertyByName(messageFlow, "address").replace("{{", "").replace("}}", "");
+                basicData.addressResolved = await this.getConfigurationParameterByName(basicData.addressRef);
                 messageFlows.push(basicData);
             }
             return messageFlows;
@@ -221,7 +253,7 @@ class IFlowParser {
     }
 
     //get the process elements from the xml
-    getProcessElements() {
+    async getProcessElements() {
 
         const processElements = {
             processes: {},
@@ -266,7 +298,7 @@ class IFlowParser {
         processElements["participants"] = this.getParticipantElements(collaboration);
 
         //get the message flows
-        processElements["messageFlows"] = this.getMessageFlows(collaboration);
+        processElements["messageFlows"] = await this.getMessageFlows(collaboration);
 
         return processElements;
     }

@@ -2,6 +2,7 @@
 
 const utils = require("./utils.js");
 const IFlowParser = require("./iflowParser.js");
+const ZipArchiveProcessing = require("./ZipArchiveProcessing.js");
 const MermaidConverter = require("./BPMNtoMermaid.js");
 
 
@@ -81,32 +82,25 @@ function listProcessElements(parsedXML) {
 async function main() {
   try {
     //download the zip file from sap api hub
-    await utils.downloadZipFile("Bamboo_AD_UserUpsert_PROD", "active");
-    // Read the zip file from the filesystem
-    const zipEntries = await utils.readZipFile();
-    // Find the iFlow files (BPMN XMLs)
-    const iFlowEntries = zipEntries.filter((entry) =>
-      utils.isIFlowEntry(entry.entryName)
-    );
+    // await utils.downloadZipFile("Bamboo_AD_UserUpsert_PROD", "active");
 
-    if (iFlowEntries.length > 0) {
-      // Get the first iFlow file
-      const iFlowEntry = iFlowEntries[0];
+    //create zip archive processing object
+    const zip = new ZipArchiveProcessing();
+    //read the zip file
+    await zip.readZipFile("iflow.zip");
 
-      // Get the content of the iFlow file
-      const bpmnXML = iFlowEntry.getData().toString("utf8");
+    //get the iflow from the zip archive
+    const { data, name } = await zip.getIflowFromZipArchive();
 
-      // Parse the BPMN XML
-      const parsedXML = await utils.parseBpmnXML(bpmnXML);
 
-      // List all available iFlows and process elements
-      console.log("Available iFlows:");
-      console.log(iFlowEntries.map((entry) => entry.entryName));
+    if (data) {
+      console.log(`Current iFlow: ${name} `);
 
-      const iFlowParser = new IFlowParser(parsedXML);
+      const iFlowParser = new IFlowParser(data);
+      iFlowParser.setIflowId(name);
 
-      const processElements = iFlowParser.getProcessElements(); //listProcessElements(parsedXML);
-      console.log("Process Elements in the first iFlow:");
+      const processElements = await iFlowParser.getProcessElements(); //listProcessElements(parsedXML);
+      // console.log("Process Elements in the first iFlow:");
       //write the process elements to the file
         await utils.writeJsonToFile(processElements, "processElements.json");
 

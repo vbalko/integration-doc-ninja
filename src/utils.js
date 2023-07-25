@@ -2,77 +2,51 @@ const fs = require("fs").promises; // Use the promise-based version of fs
 const path = require("path");
 const AdmZip = require("adm-zip");
 const xml2js = require("xml2js");
-  //import axios
-  const axios = require("axios");
+//import axios
+const axios = require("axios");
 
-//export function for reading the zip file
-module.exports.readZipFile = async function() {
-  const files = await fs.readdir(".");
-  const zipFile = files.find((file) => path.extname(file) === ".zip");
+require("dotenv").config();
 
-  if (zipFile) {
-    // Read the zip file from the filesystem
-    const zip = new AdmZip(zipFile);
-    const zipEntries = zip.getEntries();
-    return zipEntries;
-  } else {
-    console.log("No .zip file found in the root folder.");
-  }
+const configuration = {
+  tokenBuffer: "",
+  baseUrl: process.env.BASE_URL || "",
+  tokenUrl: process.env.TOKEN_URL || "",
+  clientId: process.env.CLIENT_ID || "",
+  clientSecret: process.env.CLIENT_SECRET || "",
 };
 
-// Function to check if an entry is an iFlow file
-module.exports.isIFlowEntry = function(entryName) {
-    return (
-      entryName.startsWith("src/main/resources/scenarioflows/integrationflow/") &&
-      entryName.endsWith(".iflw")
-    );
-  }
-  
-  // Function to parse BPMN XML and return a promise
-module.exports.parseBpmnXML = function(bpmnXML) {
-    return new Promise((resolve, reject) => {
-      xml2js.parseString(
-        bpmnXML,
-        {
-          explicitArray: false,
-          explicitChildren: false,
-          mergeAttrs: true,
-          xmlns: true,
-          xmlnsPrefix: "bpmn2",
-        },
-        (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        }
-      );
-    });
-  }
-
-  // write json to file
+// write json to file
 module.exports.writeJsonToFile = async function (json, fileName) {
-    await fs.writeFile(fileName, JSON.stringify(json, null, 2));
-}
+  await fs.writeFile(fileName, JSON.stringify(json, null, 2));
+};
 
 // write string to file
 module.exports.writeStringToFile = async function (string, fileName) {
-    await fs.writeFile(fileName, string);
-}
+  await fs.writeFile(fileName, string);
+};
+
+//get base url
+getBaseUrl = async function () {
+  const baseUrl = configuration.baseUrl;
+  return baseUrl;
+};
+
+//get api credentials
+getAPICredentials = async function () {
+  const clientId = configuration.clientId;;
+  const clientSecret = configuration.clientSecret;
+  return { clientId, clientSecret };
+};
 
 //download the zip file from sap api hub
-module.exports.downloadZipFile = async function (iflowId, Version="active") {
+module.exports.downloadZipFile = async function (iflowId, Version = "active") {
   //import id and secret from the environment variables
-  const clientId = process.env.CLIENT_ID || '';
-  const clientSecret = process.env.CLIENT_SECRET || '';
+  const { clientId, clientSecret } = await getAPICredentials();
 
-  const url = `https://dra-pro-int-pw98ouif.it-cpi005-rt.cfapps.eu20.hana.ondemand.com/api/v1/IntegrationDesigntimeArtifacts(Id='${iflowId}',Version='${Version}')/$value`;
+  const url = `${await getBaseUrl()}/IntegrationDesigntimeArtifacts(Id='${iflowId}',Version='${Version}')/$value`;
 
   //get oauth token
   const token = await getOAuthToken(clientId, clientSecret);
-
-
 
   //get the zip file
   const zipResponse = await axios.get(url, {
@@ -87,25 +61,55 @@ module.exports.downloadZipFile = async function (iflowId, Version="active") {
 
   //return if the zip file was downloaded
   return true;
+};
 
-}
+//get configuration parameters from api hub
+module.exports.getConfigurationParameters = async function (
+  iflowId,
+  Version = "active"
+) {
+  //get credentials
+  const { clientId, clientSecret } = await getAPICredentials();
 
-//get oauth token
+  const url = `${await getBaseUrl()}/IntegrationDesigntimeArtifacts(Id='${iflowId}',Version='${Version}')/Configurations`;
+
+  //get token
+  const token = await getOAuthToken(clientId, clientSecret);
+
+  //get the configuration parameters
+  const configurationResponse = await axios.get(url, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return configurationResponse.data.d.results;
+};
+
+//get oauth token and use local buffer in order to avoid multiple calls
 async function getOAuthToken(clientId, clientSecret) {
   //import axios
   const axios = require("axios");
 
-  //get oauth token
-  const tokenResponse = await axios.post(
-    "https://dra-pro-int-pw98ouif.authentication.eu20.hana.ondemand.com/oauth/token",
-    "client_id=" + clientId + "&client_secret=" + clientSecret + "&grant_type=client_credentials",
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-
-  //return the token
-  return tokenResponse.data.access_token;
+  //if tokenBuffer is empty, get the token
+  if (configuration.tokenBuffer === "") {
+    //get oauth token
+    const tokenResponse = await axios.post(
+      configuration.tokenUrl,
+      "client_id=" +
+        clientId +
+        "&client_secret=" +
+        clientSecret +
+        "&grant_type=client_credentials",
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+    //return the token
+    return tokenResponse.data.access_token;
+  } else {
+    //get the token from the buffer
+    return configuration.tokenBuffer;
+  }
 }
