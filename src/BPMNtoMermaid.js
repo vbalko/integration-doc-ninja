@@ -1,3 +1,32 @@
+/**
+ * BPMNtoMermaid
+ *
+ * Converts BPMN diagrams to Mermaid diagrams.
+ *
+ * Usage:
+ * const bpmnToMermaid = new BPMNtoMermaid(bpmnXml);
+ * const mermaidCode = bpmnToMermaid.createFlowchart(); // for flowchart
+ *
+ * To add support for a new event:
+ * 1. Add the event to the `supportedEvents` object.
+ * 2. Create a new method to show the event in the Mermaid diagram.
+ *
+ * To add support for a new call activity:
+ * 1. Add the call activity to the `supportedCallActivities` object.
+ * 2. Create a new method to show the call activity in the Mermaid diagram.
+ */
+
+/**
+ * An array of objects representing the supported BPMN events.
+ * Each object contains the following properties:
+ * - name: the name of the event
+ * - id: the ID of the event
+ * - supported: a boolean indicating whether the event is supported (if false, the event will not be shown in the Mermaid diagram)
+ * - showMethod: the name of the method used to show the event in the Mermaid diagram
+ * - showInProcess: a boolean indicating whether the event should be shown in a process diagram
+ * - showInSubProcess: a boolean indicating whether the event should be shown in a subprocess diagram
+ * - showInExceptionSubProcess: a boolean indicating whether the event should be shown in an exception subprocess diagram
+ */
 const supportedEvents = [
   {
     name: "startEvent",
@@ -73,6 +102,23 @@ const supportedEvents = [
   },
 ];
 
+
+/**
+ * An object representing the supported call activities.
+ * Each object contains the following properties:
+ * - shape: the shape of the call activity
+ * - classRef: the class reference of the call activity
+ * - name: the name of the call activity
+ * 
+ * If the shape is not here, then the default shape is used.
+ * 
+ * The class reference is used to define the color of the call activity.
+ * The class reference is defined in the `addClasses` method.
+ * 
+ * To add support for a new call activity:
+ * 1. Add the class reference to the `addClasses` method.
+ * 2. Add the call activity to the `callActivities` object.
+ **/
 const callActivities = {
   Splitter: {
     shape: "subroutine",
@@ -102,6 +148,14 @@ const callActivities = {
   },
 };
 
+/**
+ * Converts BPMN diagrams to Mermaid diagrams.
+ * @class
+ * @classdesc This class provides methods for converting BPMN diagrams to Mermaid diagrams.
+ * It takes a BPMN diagram in JSON format as input and outputs a Mermaid diagram in text format.
+ * The class supports a variety of BPMN elements, including start events, end events, tasks, gateways, and more.
+ * It also supports custom call activities, which can be defined using a map of activity names to shapes and class references.
+ */
 class BPMNtoMermaid {
   constructor(json) {
     this.json = json;
@@ -204,49 +258,6 @@ class BPMNtoMermaid {
       }
     }
 
-    // if (subProcess.startEvent) {
-    //   subProcess.startEvent.forEach((startEvent) => {
-    //     subProcessCode += this.showStartEvent(startEvent);
-    //   });
-    // }
-
-    // if (subProcess.endEvent) {
-    //   subProcess.endEvent.forEach((endEvent) => {
-    //     subProcessCode += this.showEndEvent(endEvent);
-    //   });
-    // }
-
-    // if (subProcess.callActivity) {
-    //   subProcess.callActivity.forEach((event) => {
-    //     const callActivityCode = this.showCallActivity(event);
-    //     subProcessCode += callActivityCode;
-    //   });
-    // }
-
-    // if (subProcess.exclusiveGateway) {
-    //   subProcess.exclusiveGateway.forEach((gateway) => {
-    //     subProcessCode += this.showExclusiveGateway(gateway);
-    //   });
-    // }
-
-    // if (subProcess.serviceTask) {
-    //   subProcess.serviceTask.forEach((serviceTask) => {
-    //     subProcessCode += this.showServiceTask(serviceTask);
-    //   });
-    // }
-
-    // if (subProcess.participant) {
-    //   subProcess.participant.forEach((participant) => {
-    //     subProcessCode += this.showParticipant(participant);
-    //   });
-    // }
-
-    // if (subProcess.sequenceFlows) {
-    //   subProcess.sequenceFlows.forEach((sequenceFlow) => {
-    //     subProcessCode += this.showSequenceFlow(sequenceFlow);
-    //   });
-    // }
-
     subProcessCode += "  end\n"; // Close the subgraph
 
     return subProcessCode;
@@ -333,6 +344,12 @@ class BPMNtoMermaid {
     return ret;
   }
 
+/**
+ * Creates a Mermaid flowchart based on the BPMN diagram in JSON format.
+ * The method processes participants, message flows, and processes to generate the flowchart.
+ * It also defines classes for each call activity type.
+ * @returns {string} The Mermaid code for the flowchart.
+ */
   createFlowchart() {
     let mermaidCode = "flowchart LR\n";
     mermaidCode += this.addLegend();
@@ -351,104 +368,6 @@ class BPMNtoMermaid {
     return mermaidCode;
   }
 
-  convertToMermaid() {
-    let mermaidCode = "flowchart LR\n";
-    mermaidCode += this.addLegend();
-    // Loop through all participants
-    // Object.values(this.json.participants).forEach((participant) => {
-    //   const participantId = participant.id;
-    //   const participantName = participant.name;
-
-    //   // Add comment for participant
-    //   mermaidCode += `%% PARTICIPANT ${participantName}\n`;
-    //   mermaidCode += this.showParticipant(participant);
-    // });
-    mermaidCode += this.processParticipants(this.json.participants);
-
-    mermaidCode += this.processMessageFlows(this.json.messageFlows);
-
-    mermaidCode += this.processProcesses(this.json.processes);
-
-    // // Loop through all message flows
-    // Object.values(this.json.messageFlows).forEach((messageFlow) => {
-    //   mermaidCode += this.showSequenceFlow(messageFlow);
-    // });
-
-    // // Loop through all processes
-    // Object.values(this.json.processes).forEach((process) => {
-    //   const { id, name } = process;
-
-    //   // Add subgraph for process
-    //   mermaidCode += `  subgraph ${processId}[${processName}]\n`;
-    //   mermaidCode += "    direction LR\n"; // Set subgraph orientation to LR using "direction"
-
-    //   // Show start events
-    //   if (process.startEvent) {
-    //     process.startEvent.forEach((startEvent) => {
-    //       mermaidCode += this.showStartEvent(startEvent);
-    //     });
-    //   }
-
-    //   // Show end events
-    //   if (process.endEvent) {
-    //     process.endEvent.forEach((endEvent) => {
-    //       mermaidCode += this.showEndEvent(endEvent);
-    //     });
-    //   }
-
-    //   // Show call activities
-    //   if (process.callActivity) {
-    //     process.callActivity.forEach((event) => {
-    //       const callActivityCode = this.showCallActivity(event);
-    //       mermaidCode += callActivityCode;
-    //     });
-    //   }
-
-    //   // Show exclusive gateways
-    //   if (process.exclusiveGateway) {
-    //     process.exclusiveGateway.forEach((gateway) => {
-    //       mermaidCode += this.showExclusiveGateway(gateway);
-    //     });
-    //   }
-
-    //   // Show sub processes
-    //   if (process.subProcesses) {
-    //     process.subProcesses.forEach((subProcess) => {
-    //       mermaidCode += this.showSubProcess(subProcess);
-    //     });
-    //   }
-
-    //   // Show service tasks
-    //   if (process.serviceTask) {
-    //     process.serviceTask.forEach((serviceTask) => {
-    //       mermaidCode += this.showServiceTask(serviceTask);
-    //     });
-    //   }
-
-    //   // Show participants
-    //   if (process.participant) {
-    //     process.participant.forEach((participant) => {
-    //       mermaidCode += this.showParticipant(participant);
-    //     });
-    //   }
-
-    //   // Show sequence flows
-    //   if (process.sequenceFlows) {
-    //     process.sequenceFlows.forEach((sequenceFlow) => {
-    //       mermaidCode += this.showSequenceFlow(sequenceFlow);
-    //     });
-    //   }
-
-    //   mermaidCode += "  end\n"; // Close the subgraph
-    // });
-
-    mermaidCode += "\n"; // Newline after the flowchart
-
-    // Define classes for each call activity type
-    mermaidCode += localUtils.addClasses();
-
-    return mermaidCode;
-  }
 }
 
 module.exports = BPMNtoMermaid;
