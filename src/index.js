@@ -39,7 +39,7 @@ async function main() {
   try {
 
     //delete all zip files in the current directory
-    await utils.deleteZipFiles();
+    //await utils.deleteZipFiles();
 
     //prepare the zip archive
     const isZipFileDownloaded = await prepareZipArchive();
@@ -62,7 +62,8 @@ async function main() {
       const iFlowParser = new IFlowParser(data);
       iFlowParser.setIflowId(name);
 
-      const processElements = await iFlowParser.getProcessElements(); //listProcessElements(parsedXML);
+      const processElements = await iFlowParser.parse();//await iFlowParser.getProcessElements(); 
+      // const processElements = await iFlowParser.getProcessElements(); 
       // console.log("Process Elements in the first iFlow:");
       //write the process elements to the file
         await utils.writeJsonToFile(processElements, "processElements.json");

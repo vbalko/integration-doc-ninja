@@ -3,13 +3,28 @@ const path = require("path");
 const SapApi = require("./SAPApiProcessing.js");
 
 // write json to file
+/**
+ * Writes a JSON object to a file.
+ * @param {Object} json - The JSON object to write to the file.
+ * @param {string} fileName - The name of the file to write the JSON object to.
+ * @returns {Promise<void>} - A Promise that resolves when the JSON object has been written to the file.
+ */
+
 module.exports.writeJsonToFile = async function (json, fileName) {
-  await fs.writeFile(fileName, JSON.stringify(json, null, 2));
+  try {
+    await fs.writeFile(fileName, JSON.stringify(json, null, 2));
+  } catch (error) {
+    console.error(`Error writing JSON to file: ${error}`);
+  }
 };
 
 module.exports.writeDataToFile = async function (data, fileName) {
-  //write the zip file to the file system
-  await fs.writeFile(fileName, data);
+  try {
+    //write the zip file to the file system
+    await fs.writeFile(fileName, data);
+  } catch (error) {
+    console.error(`Error writing data to file: ${error}`);
+  }
 };
 
 // write string to file
