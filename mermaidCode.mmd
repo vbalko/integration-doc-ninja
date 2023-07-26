@@ -1,501 +1,535 @@
 flowchart LR
 subgraph Legend
   direction LR
-      legendEnricher[/Content Modifier\]:::classEnricher
-
-      legendJsonToXmlConverter[/Json to XML Converter/]:::classJsonToXmlConverter
-
-      legendProcessCallElement[[Process Call Element]]:::classProcessCallElement
-
-      legendScript{{Script}}:::classScript
-
       legendSplitter[[Splitter]]:::classSplitter
+    legendScript{{Script}}:::classScript
+    legendJsonToXmlConverter[/Json to XML Converter/]:::classJsonToXmlConverter
+    legendProcessCallElement[[Process Call Element]]:::classProcessCallElement
+    legendEnricher[/Content Modifier\]:::classEnricher
+    legendExternalCall>External Call]:::classExternalCall
 
 end
 %% PARTICIPANT PD
-    Participant_98950[(PD)]
+     Participant_98950[(PD)]
 %% PARTICIPANT LDAP_CREATE
-    Participant_98890[(LDAP_CREATE)]
+     Participant_98890[(LDAP_CREATE)]
 %% PARTICIPANT PD_LDAP_MODIFY
-    Participant_98897[(PD_LDAP_MODIFY)]
+     Participant_98897[(PD_LDAP_MODIFY)]
 %% PARTICIPANT PD_LDAP_SEARCH_EMAIL
-    Participant_98931[(PD_LDAP_SEARCH_EMAIL)]
+     Participant_98931[(PD_LDAP_SEARCH_EMAIL)]
 %% PARTICIPANT PD_LDAP_SearchId
-    Participant_98963[(PD_LDAP_SearchId)]
+     Participant_98963[(PD_LDAP_SearchId)]
 %% PARTICIPANT MAIL_CREATE_MNG
-    Participant_98999[(MAIL_CREATE_MNG)]
+     Participant_98999[(MAIL_CREATE_MNG)]
 %% PARTICIPANT POST_BambooHR
-    Participant_99010[(POST_BambooHR)]
+     Participant_99010[(POST_BambooHR)]
 %% PARTICIPANT PD_LDAP_SEARCH_USER
-    Participant_1462402[(PD_LDAP_SEARCH_USER)]
+     Participant_1462402[(PD_LDAP_SEARCH_USER)]
 %% PARTICIPANT R_Sharepoint
-    Participant_1462461[(R_Sharepoint)]
+     Participant_1462461[(R_Sharepoint)]
 %% PARTICIPANT MAIL_SEND_MISSING_LOCATIONS
-    Participant_1462475[(MAIL_SEND_MISSING_LOCATIONS)]
+     Participant_1462475[(MAIL_SEND_MISSING_LOCATIONS)]
 %% PARTICIPANT PD_LDAP_MODIFY_ADD_GROUP
-    Participant_1462516[(PD_LDAP_MODIFY_ADD_GROUP)]
+     Participant_1462516[(PD_LDAP_MODIFY_ADD_GROUP)]
 %% PARTICIPANT KPCS_ActivateUser
-    Participant_1462551[(KPCS_ActivateUser)]
+     Participant_1462551[(KPCS_ActivateUser)]
 %% PARTICIPANT getSupervisonDistName
-%% PARTICIPANT Integration Process
-%% PARTICIPANT Add group to user
-%% PARTICIPANT ProcessLdapChange
-%% PARTICIPANT ProcessLdapCreate
-%% PARTICIPANT createEmail
-%% PARTICIPANT Get location from Sharepoint
-%% PARTICIPANT getUserFromAD
-    %% Protocol: ProcessDirect
-    %% Address: /lb_ldap_modify_add_prod
+ %% PARTICIPANT Integration Process
+ %% PARTICIPANT Add group to user
+ %% PARTICIPANT ProcessLdapChange
+ %% PARTICIPANT ProcessLdapCreate
+ %% PARTICIPANT createEmail
+ %% PARTICIPANT Get location from Sharepoint
+ %% PARTICIPANT getUserFromAD
+ %% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /lb_ldap_modify_add_prod
     ServiceTask_1462517 -->|ProcessDirect|Participant_1462516
-    %% Protocol: ProcessDirect
-    %% Address: /lb_ldap_search_prod
+%% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /lb_ldap_search_prod
     ServiceTask_1462399 -->|ProcessDirect|Participant_1462402
-    %% Protocol: Mail
-    %% Address: smtp.sendgrid.net:587
+%% bpmn2:messageFlow
+%% Protocol: Mail
+%% Address: smtp.sendgrid.net:587
     ServiceTask_1462474 -->|Mail|Participant_1462475
-    %% Protocol: Mail
-    %% Address: smtp.sendgrid.net:587
+%% bpmn2:messageFlow
+%% Protocol: Mail
+%% Address: smtp.sendgrid.net:587
     ServiceTask_98996 -->|Mail|Participant_98999
-    %% Protocol: ProcessDirect
-    %% Address: /lb_ldap_search_prod
+%% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /lb_ldap_search_prod
     ServiceTask_98928 -->|ProcessDirect|Participant_98931
-    %% Protocol: HTTP
-    %% Address: 
+%% bpmn2:messageFlow
+%% Protocol: HTTP
     ServiceTask_99007 -->|HTTP|Participant_99010
-    %% Protocol: ProcessDirect
-    %% Address: /bambooADupsertPROD
+%% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /bambooADupsertPROD
     Participant_98950 -->|ProcessDirect|StartEvent_1462603
-    %% Protocol: ProcessDirect
-    %% Address: /lb_ldap_insert_prod
+%% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /lb_ldap_insert_prod
     ServiceTask_98886 -->|ProcessDirect|Participant_98890
-    %% Protocol: ProcessDirect
-    %% Address: /lb_ldap_modify_prod
+%% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /lb_ldap_modify_prod
     ServiceTask_98892 -->|ProcessDirect|Participant_98897
-    %% Protocol: ProcessDirect
-    %% Address: /lb_ldap_search_prod
+%% bpmn2:messageFlow
+%% Protocol: ProcessDirect
+%% Address: /lb_ldap_search_prod
     ServiceTask_98960 -->|ProcessDirect|Participant_98963
-    %% Protocol: HTTP
-    %% Address: https://525f73e9-df61-4fff-8f59-8f96f04bafc0.webhook.ne.azure-automation.net/webhooks
+%% bpmn2:messageFlow
+%% Protocol: HTTP
+%% Address: https://525f73e9-df61-4fff-8f59-8f96f04bafc0.webhook.ne.azure-automation.net/webhooks
     ServiceTask_1462548 -->|HTTP|Participant_1462551
-    %% Protocol: HTTP
-    %% Address: 
+%% bpmn2:messageFlow
+%% Protocol: HTTP
     ServiceTask_1462458 -->|HTTP|Participant_1462461
+%%Process
   subgraph Process_98956[getSupervisonDistName]
-    direction LR
-    StartEvent_98957((Start 3))
-    EndEvent_98958((End 5))
-    CallActivity_1462497{{Log supervisor}}:::classScript
-    CallActivity_1462484[/search by id\]:::classEnricher
-    CallActivity_98969[/get params\]:::classEnricher
-    CallActivity_1462388[/Set headers\]:::classEnricher
-    CallActivity_1462487[/search by email\]:::classEnricher
-    ExclusiveGateway_1462481{Is supervisorId filled?}
-    ServiceTask_98960[search]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_98957 --> CallActivity_1462388
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462497 --> EndEvent_98958
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_98960 --> CallActivity_98969
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462484 --> ServiceTask_98960
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98969 --> CallActivity_1462497
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462388 --> ExclusiveGateway_1462481
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462487 --> ServiceTask_98960
-    %% Protocol: no
-    %% Address: 
+   direction LR
+%% Start Event
+     StartEvent_98957((Start 3))
+%% End Event
+     EndEvent_98958((End 5))
+%% callActivity: Script
+     CallActivity_1462497{{Log supervisor}}:::classScript
+%% callActivity: Enricher
+     CallActivity_1462484[/search by id\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_98969[/get params\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_1462388[/Set headers\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_1462487[/search by email\]:::classEnricher
+%% ExclusiveGateway
+     ExclusiveGateway_1462481{Is supervisorId filled?}
+%%Service Task     ServiceTask_98960[search]
+%% bpmn2:sequenceFlow
+    StartEvent_98957 -->CallActivity_1462388
+%% bpmn2:sequenceFlow
+    CallActivity_1462497 -->EndEvent_98958
+%% bpmn2:sequenceFlow
+    ServiceTask_98960 -->CallActivity_98969
+%% bpmn2:sequenceFlow
+    CallActivity_1462484 -->ServiceTask_98960
+%% bpmn2:sequenceFlow
+    CallActivity_98969 -->CallActivity_1462497
+%% bpmn2:sequenceFlow
+    CallActivity_1462388 -->ExclusiveGateway_1462481
+%% bpmn2:sequenceFlow
+    CallActivity_1462487 -->ServiceTask_98960
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462481 -->|no|CallActivity_1462487
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462481 -->|yes|CallActivity_1462484
   end
+%%Process
   subgraph Process_1[Integration Process]
-    direction LR
-    StartEvent_1462603((Start 11))
-    EndEvent_1462386((End 9))
-    EndEvent_98990((End 6))
-    EndEvent_2((End))
-    CallActivity_22{{Log Input}}:::classScript
-    CallActivity_98899{{Set bamboo properties and validation}}:::classScript
-    CallActivity_13[[Iterating Splitter 1]]:::classSplitter
-    CallActivity_9[/JSON to XML Converter 1/]:::classJsonToXmlConverter
-    CallActivity_1462449[[Get location]]:::classProcessCallElement
-    CallActivity_1462428[[Process Ldap Create]]:::classProcessCallElement
-    CallActivity_1462419[[Process Ldap Change]]:::classProcessCallElement
-    CallActivity_98985[[Get supervisor from AD]]:::classProcessCallElement
-    CallActivity_1462404[[Get User From AD By Id]]:::classProcessCallElement
-    CallActivity_17[/Global Variables\]:::classEnricher
-    CallActivity_4973[/Set bamboo xml properties\]:::classEnricher
-    CallActivity_4975[/Parse AD User and Set Bamboo Body\]:::classEnricher
-    ExclusiveGateway_4977{Is user found?}
-    ExclusiveGateway_1462383{Is record valid?}
+   direction LR
+%% Start Event
+     StartEvent_1462603((Start 11))
+%% End Event
+     EndEvent_1462386((End 9))
+%% End Event
+     EndEvent_98990((End 6))
+%% End Event
+     EndEvent_2((End))
+%% callActivity: Script
+     CallActivity_22{{Log Input}}:::classScript
+%% callActivity: Script
+     CallActivity_98899{{Set bamboo properties and validation}}:::classScript
+%% callActivity: Splitter
+     CallActivity_13[[Iterating Splitter 1]]:::classSplitter
+%% callActivity: JsonToXmlConverter
+     CallActivity_9[/JSON to XML Converter 1/]:::classJsonToXmlConverter
+%% callActivity: ProcessCallElement
+     CallActivity_1462449[[Get location]]:::classProcessCallElement
+%% callActivity: ProcessCallElement
+     CallActivity_1462428[[Process Ldap Create]]:::classProcessCallElement
+%% callActivity: ProcessCallElement
+     CallActivity_1462419[[Process Ldap Change]]:::classProcessCallElement
+%% callActivity: ProcessCallElement
+     CallActivity_98985[[Get supervisor from AD]]:::classProcessCallElement
+%% callActivity: ProcessCallElement
+     CallActivity_1462404[[Get User From AD By Id]]:::classProcessCallElement
+%% callActivity: Enricher
+     CallActivity_17[/Global Variables\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_4973[/Set bamboo xml properties\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_4975[/Parse AD User and Set Bamboo Body\]:::classEnricher
+%% ExclusiveGateway
+     ExclusiveGateway_4977{Is user found?}
+%% ExclusiveGateway
+     ExclusiveGateway_1462383{Is record valid?}
+%% Subprocess: Exception Subprocess 1
   subgraph SubProcess_213[Exception Subprocess 1]
     direction LR
-    StartEvent_214((Error Start 1))
-    EndEvent_98952((End 4))
-    CallActivity_219{{Log exception}}:::classScript
-    %% Protocol: 
-    %% Address: 
-    CallActivity_219 --> EndEvent_98952
-    %% Protocol: 
-    %% Address: 
-    StartEvent_214 --> CallActivity_219
+%% Start Event
+     StartEvent_214((Error Start 1))
+%% End Event
+     EndEvent_98952((End 4))
+%% callActivity: Script
+     CallActivity_219{{Log exception}}:::classScript
   end
-    %% Protocol: 
-    %% Address: 
-    CallActivity_22 --> CallActivity_9
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98899 --> ExclusiveGateway_1462383
-    %% Protocol: 
-    %% Address: 
-    StartEvent_1462603 --> CallActivity_17
-    %% Protocol: 
-    %% Address: 
-    CallActivity_13 --> CallActivity_4973
-    %% Protocol: 
-    %% Address: 
-    CallActivity_9 --> CallActivity_13
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462449 --> ExclusiveGateway_4977
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462428 --> EndEvent_2
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462419 --> EndEvent_2
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98985 --> CallActivity_1462404
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462404 --> CallActivity_4975
-    %% Protocol: 
-    %% Address: 
-    CallActivity_17 --> CallActivity_22
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4973 --> CallActivity_98899
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4975 --> CallActivity_1462449
-    %% Protocol: User NOT found - Create
-    %% Address: 
+%% bpmn2:sequenceFlow
+    CallActivity_22 -->CallActivity_9
+%% bpmn2:sequenceFlow
+    CallActivity_98899 -->ExclusiveGateway_1462383
+%% bpmn2:sequenceFlow
+    StartEvent_1462603 -->CallActivity_17
+%% bpmn2:sequenceFlow
+    CallActivity_13 -->CallActivity_4973
+%% bpmn2:sequenceFlow
+    CallActivity_9 -->CallActivity_13
+%% bpmn2:sequenceFlow
+    CallActivity_1462449 -->ExclusiveGateway_4977
+%% bpmn2:sequenceFlow
+    CallActivity_1462428 -->EndEvent_2
+%% bpmn2:sequenceFlow
+    CallActivity_1462419 -->EndEvent_2
+%% bpmn2:sequenceFlow
+    CallActivity_98985 -->CallActivity_1462404
+%% bpmn2:sequenceFlow
+    CallActivity_1462404 -->CallActivity_4975
+%% bpmn2:sequenceFlow
+    CallActivity_17 -->CallActivity_22
+%% bpmn2:sequenceFlow
+    CallActivity_4973 -->CallActivity_98899
+%% bpmn2:sequenceFlow
+    CallActivity_4975 -->CallActivity_1462449
+%% bpmn2:sequenceFlow
+%% Protocol: User NOT found - Create
     ExclusiveGateway_4977 -->|User NOT found - Create|CallActivity_1462428
-    %% Protocol: default
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: default
     ExclusiveGateway_4977 -->|default|EndEvent_98990
-    %% Protocol: User found - Change
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: User found - Change
     ExclusiveGateway_4977 -->|User found - Change|CallActivity_1462419
-    %% Protocol: Not valid
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: Not valid
     ExclusiveGateway_1462383 -->|Not valid|EndEvent_1462386
-    %% Protocol: Valid
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: Valid
     ExclusiveGateway_1462383 -->|Valid|CallActivity_98985
   end
+%%Process
   subgraph Process_1462506[Add group to user]
-    direction LR
-    StartEvent_1462507((Start 10))
-    EndEvent_1462508((End 14))
-    CallActivity_1462528{{LOG}}:::classScript
-    CallActivity_1462522{{Create valid XML body}}:::classScript
-    CallActivity_1462520{{LOG response}}:::classScript
-    CallActivity_1462513[[Iterating Splitter 2]]:::classSplitter
-    ExclusiveGateway_1462540{Add to group?}
-    ServiceTask_1462517[ldap modify-add]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_1462507 --> ExclusiveGateway_1462540
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462528 --> CallActivity_1462513
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462522 --> CallActivity_1462528
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462520 --> EndEvent_1462508
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_1462517 --> CallActivity_1462520
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462513 --> ServiceTask_1462517
-    %% Protocol: no
-    %% Address: 
+   direction LR
+%% Start Event
+     StartEvent_1462507((Start 10))
+%% End Event
+     EndEvent_1462508((End 14))
+%% callActivity: Script
+     CallActivity_1462528{{LOG}}:::classScript
+%% callActivity: Script
+     CallActivity_1462522{{Create valid XML body}}:::classScript
+%% callActivity: Script
+     CallActivity_1462520{{LOG response}}:::classScript
+%% callActivity: Splitter
+     CallActivity_1462513[[Iterating Splitter 2]]:::classSplitter
+%% ExclusiveGateway
+     ExclusiveGateway_1462540{Add to group?}
+%%Service Task     ServiceTask_1462517[ldap modify-add]
+%% bpmn2:sequenceFlow
+    StartEvent_1462507 -->ExclusiveGateway_1462540
+%% bpmn2:sequenceFlow
+    CallActivity_1462528 -->CallActivity_1462513
+%% bpmn2:sequenceFlow
+    CallActivity_1462522 -->CallActivity_1462528
+%% bpmn2:sequenceFlow
+    CallActivity_1462520 -->EndEvent_1462508
+%% bpmn2:sequenceFlow
+    ServiceTask_1462517 -->CallActivity_1462520
+%% bpmn2:sequenceFlow
+    CallActivity_1462513 -->ServiceTask_1462517
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462540 -->|no|EndEvent_1462508
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462540 -->|yes|CallActivity_1462522
   end
+%%Process
   subgraph Process_1462415[ProcessLdapChange]
-    direction LR
-    StartEvent_1462416((Start 6))
-    EndEvent_1462417((End 11))
-    CallActivity_1462439{{Mapping Change for test runs}}:::classScript
-    CallActivity_4984{{Remove and filter nodes}}:::classScript
-    CallActivity_1462479{{check if anything has changed}}:::classScript
-    CallActivity_98893{{Log after send}}:::classScript
-    CallActivity_4987{{Log before send}}:::classScript
-    CallActivity_1462598{{Mapping Change}}:::classScript
-    CallActivity_1462502[[Add groups to user]]:::classProcessCallElement
-    CallActivity_4990[/Change Variables\]:::classEnricher
-    ExclusiveGateway_1462594{Is test run?}
-    ExclusiveGateway_1462544{Is user changed?}
-    ServiceTask_98892[ldap change]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_1462416 --> CallActivity_4990
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462439 --> CallActivity_4984
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4984 --> CallActivity_1462479
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462479 --> CallActivity_4987
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98893 --> CallActivity_1462502
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4987 --> ExclusiveGateway_1462544
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462598 --> CallActivity_4984
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_98892 --> CallActivity_98893
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462502 --> EndEvent_1462417
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4990 --> ExclusiveGateway_1462594
-    %% Protocol: no
-    %% Address: 
+   direction LR
+%% Start Event
+     StartEvent_1462416((Start 6))
+%% End Event
+     EndEvent_1462417((End 11))
+%% callActivity: Script
+     CallActivity_1462439{{Mapping Change for test runs}}:::classScript
+%% callActivity: Script
+     CallActivity_4984{{Remove and filter nodes}}:::classScript
+%% callActivity: Script
+     CallActivity_1462479{{check if anything has changed}}:::classScript
+%% callActivity: Script
+     CallActivity_98893{{Log after send}}:::classScript
+%% callActivity: Script
+     CallActivity_4987{{Log before send}}:::classScript
+%% callActivity: Script
+     CallActivity_1462598{{Mapping Change}}:::classScript
+%% callActivity: ProcessCallElement
+     CallActivity_1462502[[Add groups to user]]:::classProcessCallElement
+%% callActivity: Enricher
+     CallActivity_4990[/Change Variables\]:::classEnricher
+%% ExclusiveGateway
+     ExclusiveGateway_1462594{Is test run?}
+%% ExclusiveGateway
+     ExclusiveGateway_1462544{Is user changed?}
+%%Service Task     ServiceTask_98892[ldap change]
+%% bpmn2:sequenceFlow
+    StartEvent_1462416 -->CallActivity_4990
+%% bpmn2:sequenceFlow
+    CallActivity_1462439 -->CallActivity_4984
+%% bpmn2:sequenceFlow
+    CallActivity_4984 -->CallActivity_1462479
+%% bpmn2:sequenceFlow
+    CallActivity_1462479 -->CallActivity_4987
+%% bpmn2:sequenceFlow
+    CallActivity_98893 -->CallActivity_1462502
+%% bpmn2:sequenceFlow
+    CallActivity_4987 -->ExclusiveGateway_1462544
+%% bpmn2:sequenceFlow
+    CallActivity_1462598 -->CallActivity_4984
+%% bpmn2:sequenceFlow
+    ServiceTask_98892 -->CallActivity_98893
+%% bpmn2:sequenceFlow
+    CallActivity_1462502 -->EndEvent_1462417
+%% bpmn2:sequenceFlow
+    CallActivity_4990 -->ExclusiveGateway_1462594
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462594 -->|no|CallActivity_1462598
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462594 -->|yes|CallActivity_1462439
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462544 -->|yes|ServiceTask_98892
-    %% Protocol: no
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462544 -->|no|CallActivity_1462502
   end
+%%Process
   subgraph Process_1462424[ProcessLdapCreate]
-    direction LR
-    StartEvent_1462425((Start 7))
-    EndEvent_1462426((End 12))
-    CallActivity_98946{{Generate password}}:::classScript
-    CallActivity_4999{{Remove empty nodes}}:::classScript
-    CallActivity_98994{{Set email}}:::classScript
-    CallActivity_98884{{Log after send}}:::classScript
-    CallActivity_5002{{Log before send}}:::classScript
-    CallActivity_1462435{{Mapping Create}}:::classScript
-    CallActivity_1462586{{Mapping Create for test runs}}:::classScript
-    CallActivity_98924[[Create email]]:::classProcessCallElement
-    CallActivity_1462526[[add groups to user]]:::classProcessCallElement
-    CallActivity_4993[/Create Variables\]:::classEnricher
-    CallActivity_99004[/Set body bambooHR\]:::classEnricher
-    CallActivity_1462553[/Clear headers\]:::classEnricher
-    ExclusiveGateway_1462583{Is test run?}
-    ExclusiveGateway_1462589{Is test run?}
-    ServiceTask_98886[ldal create]
-    ServiceTask_1462548[activate user webhook]
-    ServiceTask_99007[update email]
-    ServiceTask_98996[Send 1]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_1462425 --> CallActivity_4993
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98946 --> CallActivity_98924
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4999 --> CallActivity_5002
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98994 --> ServiceTask_98996
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98884 --> CallActivity_1462526
-    %% Protocol: 
-    %% Address: 
-    CallActivity_5002 --> ServiceTask_98886
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462435 --> CallActivity_4999
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462586 --> CallActivity_4999
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98924 --> ExclusiveGateway_1462583
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_98886 --> CallActivity_98884
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_1462548 --> EndEvent_1462426
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_99007 --> CallActivity_1462553
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_98996 --> CallActivity_99004
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462526 --> CallActivity_98994
-    %% Protocol: 
-    %% Address: 
-    CallActivity_4993 --> CallActivity_98946
-    %% Protocol: 
-    %% Address: 
-    CallActivity_99004 --> ServiceTask_99007
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462553 --> ExclusiveGateway_1462589
-    %% Protocol: Yes
-    %% Address: 
+   direction LR
+%% Start Event
+     StartEvent_1462425((Start 7))
+%% End Event
+     EndEvent_1462426((End 12))
+%% callActivity: Script
+     CallActivity_98946{{Generate password}}:::classScript
+%% callActivity: Script
+     CallActivity_4999{{Remove empty nodes}}:::classScript
+%% callActivity: Script
+     CallActivity_98994{{Set email}}:::classScript
+%% callActivity: Script
+     CallActivity_98884{{Log after send}}:::classScript
+%% callActivity: Script
+     CallActivity_5002{{Log before send}}:::classScript
+%% callActivity: Script
+     CallActivity_1462435{{Mapping Create}}:::classScript
+%% callActivity: Script
+     CallActivity_1462586{{Mapping Create for test runs}}:::classScript
+%% callActivity: ProcessCallElement
+     CallActivity_98924[[Create email]]:::classProcessCallElement
+%% callActivity: ProcessCallElement
+     CallActivity_1462526[[add groups to user]]:::classProcessCallElement
+%% callActivity: Enricher
+     CallActivity_4993[/Create Variables\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_99004[/Set body bambooHR\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_1462553[/Clear headers\]:::classEnricher
+%% ExclusiveGateway
+     ExclusiveGateway_1462583{Is test run?}
+%% ExclusiveGateway
+     ExclusiveGateway_1462589{Is test run?}
+%%Service Task     ServiceTask_98886[ldal create]
+%%Service Task     ServiceTask_1462548[activate user webhook]
+%%Service Task     ServiceTask_99007[update email]
+%%Service Task     ServiceTask_98996[Send 1]
+%% bpmn2:sequenceFlow
+    StartEvent_1462425 -->CallActivity_4993
+%% bpmn2:sequenceFlow
+    CallActivity_98946 -->CallActivity_98924
+%% bpmn2:sequenceFlow
+    CallActivity_4999 -->CallActivity_5002
+%% bpmn2:sequenceFlow
+    CallActivity_98994 -->ServiceTask_98996
+%% bpmn2:sequenceFlow
+    CallActivity_98884 -->CallActivity_1462526
+%% bpmn2:sequenceFlow
+    CallActivity_5002 -->ServiceTask_98886
+%% bpmn2:sequenceFlow
+    CallActivity_1462435 -->CallActivity_4999
+%% bpmn2:sequenceFlow
+    CallActivity_1462586 -->CallActivity_4999
+%% bpmn2:sequenceFlow
+    CallActivity_98924 -->ExclusiveGateway_1462583
+%% bpmn2:sequenceFlow
+    ServiceTask_98886 -->CallActivity_98884
+%% bpmn2:sequenceFlow
+    ServiceTask_1462548 -->EndEvent_1462426
+%% bpmn2:sequenceFlow
+    ServiceTask_99007 -->CallActivity_1462553
+%% bpmn2:sequenceFlow
+    ServiceTask_98996 -->CallActivity_99004
+%% bpmn2:sequenceFlow
+    CallActivity_1462526 -->CallActivity_98994
+%% bpmn2:sequenceFlow
+    CallActivity_4993 -->CallActivity_98946
+%% bpmn2:sequenceFlow
+    CallActivity_99004 -->ServiceTask_99007
+%% bpmn2:sequenceFlow
+    CallActivity_1462553 -->ExclusiveGateway_1462589
+%% bpmn2:sequenceFlow
+%% Protocol: Yes
     ExclusiveGateway_1462583 -->|Yes|CallActivity_1462586
-    %% Protocol: no
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462583 -->|no|CallActivity_1462435
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462589 -->|yes|EndEvent_1462426
-    %% Protocol: no
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462589 -->|no|ServiceTask_1462548
   end
+%%Process
   subgraph Process_98901[createEmail]
-    direction LR
-    StartEvent_98902((Start 2))
-    EndEvent_98903((End 3))
-    CallActivity_98918{{Set Email, Name}}:::classScript
-    CallActivity_98941{{Increment index}}:::classScript
-    CallActivity_98938[/Set ldapEmail, ldapName\]:::classEnricher
-    CallActivity_98933[/Parse search response\]:::classEnricher
-    CallActivity_1462406[/Set headers\]:::classEnricher
-    ExclusiveGateway_98935{Is email uniq?}
-    ServiceTask_98928[ldap search by email]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_98902 --> CallActivity_98918
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98918 --> CallActivity_1462406
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98941 --> EndEvent_98903
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_98928 --> CallActivity_98933
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98938 --> EndEvent_98903
-    %% Protocol: 
-    %% Address: 
-    CallActivity_98933 --> ExclusiveGateway_98935
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462406 --> ServiceTask_98928
-    %% Protocol: not uniq
-    %% Address: 
+   direction LR
+%% Start Event
+     StartEvent_98902((Start 2))
+%% End Event
+     EndEvent_98903((End 3))
+%% callActivity: Script
+     CallActivity_98918{{Set Email, Name}}:::classScript
+%% callActivity: Script
+     CallActivity_98941{{Increment index}}:::classScript
+%% callActivity: Enricher
+     CallActivity_98938[/Set ldapEmail, ldapName\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_98933[/Parse search response\]:::classEnricher
+%% callActivity: Enricher
+     CallActivity_1462406[/Set headers\]:::classEnricher
+%% ExclusiveGateway
+     ExclusiveGateway_98935{Is email uniq?}
+%%Service Task     ServiceTask_98928[ldap search by email]
+%% bpmn2:sequenceFlow
+    StartEvent_98902 -->CallActivity_98918
+%% bpmn2:sequenceFlow
+    CallActivity_98918 -->CallActivity_1462406
+%% bpmn2:sequenceFlow
+    CallActivity_98941 -->EndEvent_98903
+%% bpmn2:sequenceFlow
+    ServiceTask_98928 -->CallActivity_98933
+%% bpmn2:sequenceFlow
+    CallActivity_98938 -->EndEvent_98903
+%% bpmn2:sequenceFlow
+    CallActivity_98933 -->ExclusiveGateway_98935
+%% bpmn2:sequenceFlow
+    CallActivity_1462406 -->ServiceTask_98928
+%% bpmn2:sequenceFlow
+%% Protocol: not uniq
     ExclusiveGateway_98935 -->|not uniq|CallActivity_98941
-    %% Protocol: uniq
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: uniq
     ExclusiveGateway_98935 -->|uniq|CallActivity_98938
   end
+%%Process
   subgraph Process_1462451[Get location from Sharepoint]
-    direction LR
-    StartEvent_1462452((Start 9))
-    EndEvent_1462453((End 13))
-    CallActivity_1462472{{Set email body}}:::classScript
-    CallActivity_1462463{{Log Location}}:::classScript
-    CallActivity_1462466{{Check response and set props}}:::classScript
-    CallActivity_1462455[/Set filter\]:::classEnricher
-    ExclusiveGateway_1462469{Is location found?}
-    ExclusiveGateway_1462490{Is location empty?}
-    ServiceTask_1462458[Get Location Info]
-    ServiceTask_1462474[Send 2]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_1462452 --> ExclusiveGateway_1462490
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462472 --> ServiceTask_1462474
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462463 --> CallActivity_1462466
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462466 --> ExclusiveGateway_1462469
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_1462458 --> CallActivity_1462463
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_1462474 --> EndEvent_1462453
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462455 --> ServiceTask_1462458
-    %% Protocol: no
-    %% Address: 
+   direction LR
+%% Start Event
+     StartEvent_1462452((Start 9))
+%% End Event
+     EndEvent_1462453((End 13))
+%% callActivity: Script
+     CallActivity_1462472{{Set email body}}:::classScript
+%% callActivity: Script
+     CallActivity_1462463{{Log Location}}:::classScript
+%% callActivity: Script
+     CallActivity_1462466{{Check response and set props}}:::classScript
+%% callActivity: Enricher
+     CallActivity_1462455[/Set filter\]:::classEnricher
+%% ExclusiveGateway
+     ExclusiveGateway_1462469{Is location found?}
+%% ExclusiveGateway
+     ExclusiveGateway_1462490{Is location empty?}
+%%Service Task     ServiceTask_1462458[Get Location Info]
+%%Service Task     ServiceTask_1462474[Send 2]
+%% bpmn2:sequenceFlow
+    StartEvent_1462452 -->ExclusiveGateway_1462490
+%% bpmn2:sequenceFlow
+    CallActivity_1462472 -->ServiceTask_1462474
+%% bpmn2:sequenceFlow
+    CallActivity_1462463 -->CallActivity_1462466
+%% bpmn2:sequenceFlow
+    CallActivity_1462466 -->ExclusiveGateway_1462469
+%% bpmn2:sequenceFlow
+    ServiceTask_1462458 -->CallActivity_1462463
+%% bpmn2:sequenceFlow
+    ServiceTask_1462474 -->EndEvent_1462453
+%% bpmn2:sequenceFlow
+    CallActivity_1462455 -->ServiceTask_1462458
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462469 -->|no|CallActivity_1462472
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462469 -->|yes|EndEvent_1462453
-    %% Protocol: yes
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: yes
     ExclusiveGateway_1462490 -->|yes|EndEvent_1462453
-    %% Protocol: no
-    %% Address: 
+%% bpmn2:sequenceFlow
+%% Protocol: no
     ExclusiveGateway_1462490 -->|no|CallActivity_1462455
   end
+%%Process
   subgraph Process_1462392[getUserFromAD]
-    direction LR
-    StartEvent_1462393((Start 5))
-    EndEvent_1462394((End 10))
-    CallActivity_1462494{{Log user from AD}}:::classScript
-    CallActivity_1462396[/Set headers\]:::classEnricher
-    ServiceTask_1462399[Search user]
-    %% Protocol: 
-    %% Address: 
-    StartEvent_1462393 --> CallActivity_1462396
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462494 --> EndEvent_1462394
-    %% Protocol: 
-    %% Address: 
-    ServiceTask_1462399 --> CallActivity_1462494
-    %% Protocol: 
-    %% Address: 
-    CallActivity_1462396 --> ServiceTask_1462399
+   direction LR
+%% Start Event
+     StartEvent_1462393((Start 5))
+%% End Event
+     EndEvent_1462394((End 10))
+%% callActivity: Script
+     CallActivity_1462494{{Log user from AD}}:::classScript
+%% callActivity: Enricher
+     CallActivity_1462396[/Set headers\]:::classEnricher
+%%Service Task     ServiceTask_1462399[Search user]
+%% bpmn2:sequenceFlow
+    StartEvent_1462393 -->CallActivity_1462396
+%% bpmn2:sequenceFlow
+    CallActivity_1462494 -->EndEvent_1462394
+%% bpmn2:sequenceFlow
+    ServiceTask_1462399 -->CallActivity_1462494
+%% bpmn2:sequenceFlow
+    CallActivity_1462396 -->ServiceTask_1462399
   end
 
 classDef classSplitter stroke:#000,fill:#FFDAB9;
-classDef classScript stroke:#000,fill:#FFC0CB;
-classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;
-classDef classProcessCallElement stroke:#000,fill:#B0E0E6;
-classDef classEnricher stroke:#000,fill:#FFB6C1;
-classDef classExternalCall stroke:#000,fill:#FFB6C1;
-style Process_1 fill:#E0FFFF,stroke:#000;
-style Legend fill:#98FB98,stroke:#000;
+
+      classDef classScript stroke:#000,fill:#FFC0CB;
+
+      classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;
+
+      classDef classProcessCallElement stroke:#000,fill:#B0E0E6;
+
+      classDef classEnricher stroke:#000,fill:#b8c9ff;
+
+      classDef classExternalCall stroke:#000,fill:#ffb8ff;
+
+      classDef classDefault stroke:#000,fill:#FF0000;
+
+      style Process_1 fill:#E0FFFF,stroke:#000;
+
+      style Legend fill:#98FB98,stroke:#000;
+
+      

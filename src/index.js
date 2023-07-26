@@ -70,7 +70,8 @@ async function main() {
 
         //convert the process elements to mermaid
         const mermaidConverter = new MermaidConverter(processElements);
-        const mermaidCode = mermaidConverter.convertToMermaid();
+        const mermaidCode = mermaidConverter.createFlowchart();
+        //const mermaidCode = mermaidConverter.convertToMermaid();
         //write the mermaid code to the file
         await utils.writeStringToFile(mermaidCode, "mermaidCode.mmd");
     } else {
