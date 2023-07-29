@@ -381,11 +381,16 @@ class BPMNtoMermaid {
   createOverviewFlowchart(data) {
     let mermaidCode = "flowchart LR\n";
 
-    for (const process of data) {
+    for (const process of data.processes) {
       const { iflowId, sender, receiver } = process;
       mermaidCode += `%% Process: ${iflowId}\n`;
       mermaidCode += `${iflowId}[${iflowId}]\n`;
     }
+
+    for (const messageFlow of data.messageFlows) {
+      mermaidCode += this.showSequenceFlow(messageFlow);
+    }
+    
 
     mermaidCode += "\n"; // Newline after the flowchart
 

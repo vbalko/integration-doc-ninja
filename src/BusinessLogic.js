@@ -40,7 +40,10 @@ module.exports.processIflows = {
     //create html output object
     const html = new htmlOutput();
 
-    const overviewDiagramData = [];
+    const overviewDiagramData = {
+      processes: [],
+      messageFlows: [],
+    };
 
     /** LOOP OVER IFLOWS
     /*loop through all the iflows and create process flow for each iflow
@@ -76,7 +79,9 @@ module.exports.processIflows = {
           );
 
           //get process input/output information - this is used to create the overview diagram
-          overviewDiagramData.push(await iFlowParser.getProcessInputOutput());
+          overviewDiagramData.processes.push(
+            await iFlowParser.getProcessInputOutput()
+          );
 
           /** PARSE PROCESS ELEMENTS TO CREATE PROCESS FLOW (MERMAID)
            * ********************************/
@@ -103,15 +108,24 @@ module.exports.processIflows = {
     /** CREATE OVERVIEW DIAGRAM
      * ********************************/
     const mermaidConverter = new MermaidConverter({});
-    const overviewDiagram = await mermaidConverter.createOverviewFlowchart(overviewDiagramData);
+    overviewDiagramData.messageFlows = await localUtils.prepareOverviewDiagram(
+      overviewDiagramData
+    );
+    const overviewDiagram = await mermaidConverter.createOverviewFlowchart(
+      overviewDiagramData
+    );
     await utils.writeDataToFile(
-        overviewDiagram,
-        `overviewFlowChart.mmd`,
-        projectFolder
-        );
+      overviewDiagram,
+      `overviewFlowChart.mmd`,
+      projectFolder
+    );
     await utils.convertMMDToSVG(`overviewFlowChart.mmd`, projectFolder);
     //add the overview diagram to the html output
-    html.addDiagram({ name: "overviewFlowChart", projectFolder, mermaidData: overviewDiagram });
+    html.addDiagram({
+      name: "overviewFlowChart",
+      projectFolder,
+      mermaidData: overviewDiagram,
+    });
 
     //write the html output to file
     console.log("Writing HTML output to file...");
@@ -180,5 +194,47 @@ const localUtils = {
     }
   },
 
-  prepareOverviewDiagram: async (options) => {},
+  prepareOverviewDiagram: async (data) => {
+    let ret = [];
+    let dummyCounter = 0;
+    //try to find process where sender (addressRef or addressResolved) matches input address
+    const findTargetRef = (receiver) => {
+      let ret1 = null;
+      for (const process of data.processes) {
+        for (const sender of process.sender) {
+          if (
+            (receiver.addressResolved &&
+              (sender.addressResolved === receiver.addressResolved ||
+                sender.addressRef === receiver.addressResolved)) ||
+            (receiver.addressRef &&
+              (sender.addressResolved === receiver.addressRef ||
+                sender.addressRef === receiver.addressRef))
+          ) {
+            ret1 = { id: process.iflowId, sender: sender, receiver: receiver };
+          }
+        }
+      }
+      //if no match found, create dummy process based on receiver
+      return ret1; //{id:`DUMMY_${dummyCounter++}`,sender:{addressResolved:receiver.addressResolved}, receiver:receiver};
+    };
+
+    //loop over all the processes and create message flows
+    //1. each receiver is a message flow
+    for (const process of data.processes) {
+      for (const receiver of process.receiver) {
+        const sender = findTargetRef(receiver);
+        if (sender) {
+          ret.push({
+            sourceRef: process.iflowId,
+            targetRef: sender.id,
+            addressRef: receiver.address,
+            addressResolved: receiver.addressResolved,
+            name: receiver.name,
+            type: "bpmn2:messageFlow",
+          });
+        }
+      }
+    }
+    return ret;
+  },
 };
