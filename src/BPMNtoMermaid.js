@@ -378,6 +378,23 @@ class BPMNtoMermaid {
     return mermaidCode;
   }
 
+  createOverviewFlowchart(data) {
+    let mermaidCode = "flowchart LR\n";
+
+    for (const process of data) {
+      const { iflowId, sender, receiver } = process;
+      mermaidCode += `%% Process: ${iflowId}\n`;
+      mermaidCode += `${iflowId}[${iflowId}]\n`;
+    }
+
+    mermaidCode += "\n"; // Newline after the flowchart
+
+    // Define classes for each call activity type
+    // mermaidCode += localUtils.addClasses();
+
+    return mermaidCode;
+  }
+
 }
 
 module.exports = BPMNtoMermaid;
@@ -417,6 +434,7 @@ const localUtils = {
       .getSupportedEvents()
       .filter((event) => event.showInSubProcess);
   },
+
 };
 
 //TODO backup

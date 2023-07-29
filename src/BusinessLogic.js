@@ -39,13 +39,15 @@ module.exports.processIflows = {
 
     //create html output object
     const html = new htmlOutput();
-    
+
+    const overviewDiagramData = [];
+
     /** LOOP OVER IFLOWS
     /*loop through all the iflows and create process flow for each iflow
     ********************************/
     for (const iflow of iflows) {
       /** PROCESS EACH IFLOW
-      ********************************/
+       ********************************/
       const isZipFileDownloaded = await localUtils.prepareZipArchive({
         iflowId: iflow.Id,
         folderName: projectFolder,
@@ -60,38 +62,74 @@ module.exports.processIflows = {
           parseXML: true,
         });
         if (data) {
-        /** PARSE IFLOW TO GET PROCESS ELEMENTS (JSON)
-         * ********************************/
+          /** PARSE IFLOW TO GET PROCESS ELEMENTS (JSON)
+           * ********************************/
           console.log(`Current iFlow: ${name} `);
           const iFlowParser = new IFlowParser(data);
           iFlowParser.setIflowId(name);
-          
+
           const processElements = await iFlowParser.parse();
-          await utils.writeJsonToFile(processElements, `${name}.json`, projectFolder);
+          await utils.writeJsonToFile(
+            processElements,
+            `${name}.json`,
+            projectFolder
+          );
+
+          //get process input/output information - this is used to create the overview diagram
+          overviewDiagramData.push(await iFlowParser.getProcessInputOutput());
 
           /** PARSE PROCESS ELEMENTS TO CREATE PROCESS FLOW (MERMAID)
            * ********************************/
-            const mermaidConverter = new MermaidConverter(processElements);
-            const mermaidData = await mermaidConverter.createFlowchart();
-            await utils.writeDataToFile(mermaidData, `${name}.mmd`, projectFolder);
-            await utils.convertMMDToSVG(`${name}.mmd`, projectFolder);
+          const mermaidConverter = new MermaidConverter(processElements);
+          const mermaidData = await mermaidConverter.createFlowchart();
+          await utils.writeDataToFile(
+            mermaidData,
+            `${name}.mmd`,
+            projectFolder
+          );
+          await utils.convertMMDToSVG(`${name}.mmd`, projectFolder);
 
-            /** CREATE HTML OUTPUT
-             * ********************************/    
-            //add the mermaid diagram to the html output
-            html.setProjectName(projectName);
-            html.addDiagram({name, projectFolder, mermaidData});
-
+          /** CREATE HTML OUTPUT
+           * ********************************/
+          //add the mermaid diagram to the html output
+          html.setProjectName(projectName);
+          html.addDiagram({ name, projectFolder, mermaidData });
         }
       } else {
         console.log(`Failed to download zip file for iFlow ${iflow}`);
       }
-    };
+    }
+
+    /** CREATE OVERVIEW DIAGRAM
+     * ********************************/
+    const mermaidConverter = new MermaidConverter({});
+    const overviewDiagram = await mermaidConverter.createOverviewFlowchart(overviewDiagramData);
+    await utils.writeDataToFile(
+        overviewDiagram,
+        `overviewFlowChart.mmd`,
+        projectFolder
+        );
+    await utils.convertMMDToSVG(`overviewFlowChart.mmd`, projectFolder);
+    //add the overview diagram to the html output
+    html.addDiagram({ name: "overviewFlowChart", projectFolder, mermaidData: overviewDiagram });
+
     //write the html output to file
     console.log("Writing HTML output to file...");
-    await utils.writeDataToFile(html.HTMLTemplateMermaid(), `${projectName}.mermaid.html`, `${projectFolder}/html`);
-    await utils.writeDataToFile(html.HTMLTemplatePNG(), `${projectName}.png.html`, `${projectFolder}/html`);
-    await utils.writeDataToFile(html.HTMLTemplateSVG(), `${projectName}.svg.html`, `${projectFolder}/html`);
+    await utils.writeDataToFile(
+      html.HTMLTemplateMermaid(),
+      `${projectName}.mermaid.html`,
+      `${projectFolder}/html`
+    );
+    await utils.writeDataToFile(
+      html.HTMLTemplatePNG(),
+      `${projectName}.png.html`,
+      `${projectFolder}/html`
+    );
+    await utils.writeDataToFile(
+      html.HTMLTemplateSVG(),
+      `${projectName}.svg.html`,
+      `${projectFolder}/html`
+    );
   },
 };
 
@@ -141,4 +179,6 @@ const localUtils = {
       }
     }
   },
+
+  prepareOverviewDiagram: async (options) => {},
 };

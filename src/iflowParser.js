@@ -53,6 +53,31 @@ class IFlowParser {
     this.iflowId = iflowId;
   }
 
+  /**
+   * Returns an object containing the iflow ID, sender and receiver message flows.
+   * If the parsed data is not available, returns false.
+   * @returns {Object|boolean} An object containing the iflow ID, sender and receiver message flows, or false if the parsed data is not available.
+   */
+  async getProcessInputOutput() {
+    //check if we have already parsed the data, if not - return false
+    if (Object.keys(this.parsedData).length === 0) {
+      return false;
+    }
+    //find message flow with direction "Sender"
+    const sender = this.parsedData["messageFlows"].filter(
+      (messageFlow) => messageFlow["direction"] === "Sender"
+    );
+    //find message flow with direction "Receiver"
+    const receiver = this.parsedData["messageFlows"].filter(
+      (messageFlow) => messageFlow["direction"] === "Receiver"
+    );
+    return {
+      iflowId: this.iflowId,
+      sender: sender,
+      receiver: receiver,
+    }
+  }
+
   //parse the iflow xml
   async parse() {
     try {
@@ -463,11 +488,30 @@ const localUtils = {
           ret.addressRef
         );
         break;
+      case 'LDAP':
+        ret.addressRef = localUtils
+          .getPropertyByName(messageFlow, "ldapAddress")
+          .replace("{{", "")
+          .replace("}}", "");
+        ret.addressResolved = await instance.getConfigurationParameterByName(
+          ret.addressRef
+        );        
+        break;
+      //case for HTTP and HTTPS
       case "HTTP":
+      case 'HTTPS':
+      // case "HTTP" || 'HTTPS':
         ret.addressRef = localUtils
           .getPropertyByName(messageFlow, "httpAddressWithoutQuery")
           .replace("{{", "")
           .replace("}}", "");
+//TODO: maybe it would be better to decide upon sender/receiver direction
+        if (ret.addressRef === "") {
+          ret.addressRef = localUtils
+            .getPropertyByName(messageFlow, "urlPath")
+            .replace("{{", "")
+            .replace("}}", "");
+        }
         ret.addressResolved = await instance.getConfigurationParameterByName(
           ret.addressRef
         );
