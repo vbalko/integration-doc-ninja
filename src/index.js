@@ -1,45 +1,52 @@
+// const utils = require("./utils.js");
+// const IFlowParser = require("./iflowParser.js");
+// const ZipArchiveProcessing = require("./ZipArchiveProcessing.js");
+// const SapApi = require("./SAPApiProcessing.js");
+// const MermaidConverter = require("./BPMNtoMermaid.js");
+const businessLogic = require("./BusinessLogic.js");
 
-
-const utils = require("./utils.js");
-const IFlowParser = require("./iflowParser.js");
-const ZipArchiveProcessing = require("./ZipArchiveProcessing.js");
-const SapApi = require("./SAPApiProcessing.js");
-const MermaidConverter = require("./BPMNtoMermaid.js");
-
-//function to prepare zip archive
-async function prepareZipArchive() {
-  //get the iflow id from the command line
-  const iflowId = process.argv[2] || 'Bamboo_AD_UserUpsert_PROD';
-  if (!iflowId) {
-    console.log("Please provide the iFlow ID as a command line argument.");
-    return false;
-  }
-  //check if iflow zip file is downloaded
-  const isZipFileDownloaded = await utils.zipFileDownloaded(iflowId);
-  if (isZipFileDownloaded) {
-    return true;
-  } else {
-    //log that zip is going to be downloaded
-    console.log(`Downloading zip file for iFlow ${iflowId}...`);
-    //download the zip file
-    const sapApi = new SapApi();
-    const isZipFileDownloaded = await sapApi.downloadZipFile(iflowId);
-    if (isZipFileDownloaded) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+//test get iflow by correlation id
+async function testGetIflowsByCorrelationId() {
+  const sapApi = new SapApi();
+  const iflowId = "Bamboo_AD_UserUpsert_PROD";
+  const iflows = await sapApi.getIflowsByCorrelationIdSimple(iflowId);
+  console.log(iflows);
 }
-
-
 
 // Main function to read the zip file and process the iFlow
 async function main() {
   try {
+    //get two arguments from the command line
+    // first is the iflow id and second is the project name
+    // if not provided, write message how to use the script and exit
+    const iflowId = process.argv[2];
+    const projectName = process.argv[3];
 
-    //delete all zip files in the current directory
-    //await utils.deleteZipFiles();
+    if (!iflowId || !projectName) {
+      //if we are in debug mode, use the default values
+      if (process.env.DEBUG) {
+        iflowId = "Bamboo_AD_UserUpsert_PROD";
+        projectName = "Bamboo AD Synchronization";
+      } else {
+        console.log(
+          `Please provide the iFlow ID and project name as command line arguments.\n Example: node index.js Bamboo_AD_UserUpsert_PROD Bamboo AD Synchronization`
+        );
+        return false;
+      }
+    }
+
+    // //get the iflow id from the command line
+    // const iflowId = process.argv[2] || "Bamboo_AD_UserUpsert_PROD";
+    // if (!iflowId) {
+    //   console.log("Please provide the iFlow ID as a command line argument.");
+    //   return false;
+    // }
+
+    await businessLogic.processIflows.processIntegrationProcess({
+      iflowId: iflowId,
+      projectName: projectName,
+    });
+    return;
 
     //prepare the zip archive
     const isZipFileDownloaded = await prepareZipArchive();
@@ -55,25 +62,24 @@ async function main() {
     //get the iflow from the zip archive
     const { data, name } = await zip.getIflowFromZipArchive();
 
-
     if (data) {
       console.log(`Current iFlow: ${name} `);
 
       const iFlowParser = new IFlowParser(data);
       iFlowParser.setIflowId(name);
 
-      const processElements = await iFlowParser.parse();//await iFlowParser.getProcessElements(); 
-      // const processElements = await iFlowParser.getProcessElements(); 
+      const processElements = await iFlowParser.parse(); //await iFlowParser.getProcessElements();
+      // const processElements = await iFlowParser.getProcessElements();
       // console.log("Process Elements in the first iFlow:");
       //write the process elements to the file
-        await utils.writeJsonToFile(processElements, "processElements.json");
+      await utils.writeJsonToFile(processElements, "processElements.json");
 
-        //convert the process elements to mermaid
-        const mermaidConverter = new MermaidConverter(processElements);
-        const mermaidCode = mermaidConverter.createFlowchart();
-        //const mermaidCode = mermaidConverter.convertToMermaid();
-        //write the mermaid code to the file
-        await utils.writeStringToFile(mermaidCode, "mermaidCode.mmd");
+      //convert the process elements to mermaid
+      const mermaidConverter = new MermaidConverter(processElements);
+      const mermaidCode = mermaidConverter.createFlowchart();
+      //const mermaidCode = mermaidConverter.convertToMermaid();
+      //write the mermaid code to the file
+      await utils.writeStringToFile(mermaidCode, "mermaidCode.mmd");
     } else {
       console.log("No iFlow (BPMN XML) files found in the zip.");
     }

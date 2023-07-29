@@ -55,7 +55,15 @@ class SAPApidProcessing {
     return baseUrl;
   }
 
-  //call api with oauth token
+  /**
+   * Calls the SAP API with the provided options.
+   * @param {Object} options - The options for the API call.
+   * @param {string} options.url - The URL for the API call.
+   * @param {string} [options.method='get'] - The HTTP method for the API call.
+   * @param {Object} [options.data=null] - The data to send with the API call.
+   * @param {string} [options.responseType='json'] - The response type for the API call.
+   * @returns {Promise<Object>} - The response data from the API call.
+   */
   async callAPI(options) {
     const { url, method = "get", data = null, responseType = "json" } = options;
 
@@ -101,13 +109,98 @@ class SAPApidProcessing {
       url: url,
       responseType: "arraybuffer",
     });
+    
+    //return the iflow data (zip file as arraybuffer)
+    return response;
+    // //write the zip file to the file system
+    // await utils.writeDataToFile(response, `${iflowId}.zip`);
+    // // await fs.writeFile(`${iflowId}.zip`, response.data);
 
-    //write the zip file to the file system
-    await utils.writeDataToFile(response, `${iflowId}.zip`);
-    // await fs.writeFile(`${iflowId}.zip`, response.data);
+    // //return if the zip file was downloaded
+    // return true;
+  }
 
-    //return if the zip file was downloaded
-    return true;
+  //get iflow which are called by the provided iflow (based on correlation id) - Simple Way
+  async getIflowsByCorrelationIdSimple(iflowId) {
+    //get last call of the iflow to get the correlation id
+    const lastCall = await this.getMplRecords({
+      filter: `IntegrationFlowName  eq '${iflowId}'`,
+      orderby: "LogStart desc",
+      top: 1,
+    });
+    //get the correlation id
+    const correlationId = lastCall[0].CorrelationId;
+
+    //get all calls of the iflow with the correlation id
+    const calls = await this.getMplRecords({
+      filter: `CorrelationId  eq '${correlationId}'`,
+      orderby: "LogStart desc",
+    });
+
+    //get all iflows which are called by the provided iflow
+    const iflows = [];
+    for (const call of calls) {
+      //only if IntegrationArtifact.Type is INTEGRAION_FLOW
+      if (call.IntegrationArtifact.Type === "INTEGRATION_FLOW") {
+        if (call.IntegrationArtifact.Id !== iflowId) {
+          iflows.push({
+            Id: call.IntegrationArtifact.Id,
+            Name: call.IntegrationArtifact.Name,
+            PackageId: call.IntegrationArtifact.PackageId,
+            PackageName: call.IntegrationArtifact.PackageName,
+          });
+        }
+      }
+    }
+
+    //remove duplicates based on Id
+    const uniqueIflows = iflows.filter(
+      (thing, index, self) =>
+        index === self.findIndex((t) => t.Id === thing.Id)
+    );
+
+    //return the iflows
+    return uniqueIflows;
+  }
+
+  //get MPL records from api hub
+  async getMplRecords(parameters) {
+    const {
+      filter = "",
+      orderby = "",
+      skip = "",
+      top = "",
+      format = "json",
+    } = parameters;
+    // Build the parameters string for the request
+    let params = "";
+    if (filter) {
+      params += `&$filter=${filter}`;
+    }
+    if (orderby) {
+      params += `&$orderby=${orderby}`;
+    }
+    if (skip) {
+      params += `&$skip=${skip}`;
+    }
+    if (top) {
+      params += `&$top=${top}`;
+    }
+    if (format) {
+      params += `&$format=${format}`;
+    }
+    if (params) {
+      params = "?" + params.substring(1);
+    }
+
+    // Build the URL
+    const url = `${await this.getBaseUrl()}/MessageProcessingLogs${params}`;
+
+    //call the api
+    const response = await this.callAPI({ url: url });
+
+    //return the response
+    return response.d.results;
   }
 }
 

@@ -131,11 +131,21 @@ const callActivities = {
     classRef: "classJsonToXmlConverter",
     name: "Json to XML Converter",
   },
+  XmlToJsonConverter: {
+    shape: "parallelogram",
+    classRef: "classXmlToJsonConverter",
+    name: "XML to Json Converter",
+  },  
   ProcessCallElement: {
     shape: "subroutine",
     classRef: "classProcessCallElement",
     name: "Process Call Element",
   },
+  Mapping: {
+    shape: "subroutine",
+    classRef: "classMapping",
+    name: "Mapping",
+  },  
   Enricher: {
     shape: "trapezoid",
     classRef: "classEnricher",
@@ -217,7 +227,7 @@ class BPMNtoMermaid {
     const { id, activityType, name = "" } = event;
     const { shape, classRef } = callActivities[activityType] || {
       shape: "stadium",
-      classRef: classDefault,
+      classRef: "classDefault",
     };
 
     return `%% callActivity: ${activityType}\n ${this.showElement(
@@ -248,11 +258,11 @@ class BPMNtoMermaid {
 
     //loop through all events
     for (const event of events) {
-      const { name, showMethod } = event;
+      const { name, showMethod, id } = event;
       //if the event exists in the sub process, then show it
-      if (subProcess[name]) {
+      if (subProcess[id]) {
         //loop through all events of the same type
-        for (const event2 of subProcess[name]) {
+        for (const event2 of subProcess[id]) {
           subProcessCode += this[showMethod](event2);
         }
       }
@@ -383,9 +393,11 @@ const localUtils = {
     const classes = `classDef classSplitter stroke:#000,fill:#FFDAB9;\n
       classDef classScript stroke:#000,fill:#FFC0CB;\n
       classDef classJsonToXmlConverter stroke:#000,fill:#98FB98;\n
+      classDef classXmlToJsonConverter stroke:#000,fill:#98FB98;\n
       classDef classProcessCallElement stroke:#000,fill:#B0E0E6;\n
       classDef classEnricher stroke:#000,fill:#b8c9ff;\n
       classDef classExternalCall stroke:#000,fill:#ffb8ff;\n
+      classDef classMapping stroke:#000,fill:#ffebcc;\n
       classDef classDefault stroke:#000,fill:#FF0000;\n
       style Process_1 fill:#E0FFFF,stroke:#000;\n
       style Legend fill:#98FB98,stroke:#000;\n

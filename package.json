@@ -9,6 +9,7 @@
   "author": "vbalko@gmail.com",
   "license": "ISC",
   "dependencies": {
+    "@mermaid-js/mermaid-cli": "^10.2.4",
     "adm-zip": "^0.5.10",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
