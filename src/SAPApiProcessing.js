@@ -5,7 +5,7 @@ const utils = require("./utils.js");
 
 const configuration = {
   tokenBuffer: "",
-  configBuffer: "",
+  configBuffer: {},
   baseUrl: process.env.BASE_URL || "",
   tokenUrl: process.env.TOKEN_URL || "",
   clientId: process.env.CLIENT_ID || "",
@@ -89,15 +89,15 @@ class SAPApidProcessing {
     const url = `${await this.getBaseUrl()}/IntegrationDesigntimeArtifacts(Id='${iflowId}',Version='${Version}')/Configurations`;
 
     //if configBuffer is empty, get the config
-    if (configuration.configBuffer === "") {
+    if (configuration.configBuffer[iflowId] === undefined) {
       //call the api
       const response = await this.callAPI({ url: url });
       //save the response to the buffer
-      configuration.configBuffer = response.d.results;
+      configuration.configBuffer[iflowId] = response.d.results;
     }
 
     //return the config from the buffer
-    return configuration.configBuffer;
+    return configuration.configBuffer[iflowId];
   }
 
   //download the zip file from sap api hub
@@ -142,14 +142,14 @@ class SAPApidProcessing {
     for (const call of calls) {
       //only if IntegrationArtifact.Type is INTEGRAION_FLOW
       if (call.IntegrationArtifact.Type === "INTEGRATION_FLOW") {
-        if (call.IntegrationArtifact.Id !== iflowId) {
+        // if (call.IntegrationArtifact.Id !== iflowId) {
           iflows.push({
             Id: call.IntegrationArtifact.Id,
             Name: call.IntegrationArtifact.Name,
             PackageId: call.IntegrationArtifact.PackageId,
             PackageName: call.IntegrationArtifact.PackageName,
           });
-        }
+        // }
       }
     }
 

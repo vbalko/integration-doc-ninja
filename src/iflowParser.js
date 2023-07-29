@@ -195,6 +195,7 @@ async parseMessageFlows(inputXML) {
       type: "bpmn2:messageFlow",
       sourceRef: messageFlow.sourceRef?.value || "",
       targetRef: messageFlow.targetRef?.value || "",
+      direction: await localUtils.getPropertyByName(messageFlow, "direction"),
     };
     const address = await localUtils.getMessageFlowAddress(
       this,

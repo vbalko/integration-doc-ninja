@@ -55,6 +55,18 @@ class HTMLOutput {
         return ret;
     }    
 
+    addTableOfContents() {
+        let ret = ``;
+        ret += `<h2 style="text-align: center;">Table of Contents</h2>\n`;
+        ret += `<ul style="list-style-type: none; padding-left: 0; margin-bottom: 20px;">\n`;
+        for (const [index, chart] of this.charts.entries()) {
+            ret += `<li style="margin-bottom: 10px;"><a href="#chart${index}" style="text-decoration: none; color: #0078d4;">${chart.name}</a></li>\n`;
+        }
+        ret += `</ul>\n`;
+        ret += `<hr style="border: none; border-top: 1px solid #ddd; margin-bottom: 20px;">\n`;
+        return ret;
+    }
+
     /**
      * Generates the HTML template for the output.
      * @returns {string} - The HTML template as a string.
@@ -68,6 +80,7 @@ class HTMLOutput {
         </script>
       <body>
         <h1>${this.projectName}</h1>
+        ${this.addTableOfContents()}
         ${this.addHtmlElementsMermaid()}
         <script type="module">
           import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
@@ -82,6 +95,7 @@ class HTMLOutput {
         let html = `<html>
       <body>
         <h1>${this.projectName}</h1>
+        ${this.addTableOfContents()}
         ${this.addHtmlElementsPNG()}
       </body>
     </html>`;
@@ -92,6 +106,7 @@ class HTMLOutput {
         let html = `<html>
       <body>
         <h1>${this.projectName}</h1>
+        ${this.addTableOfContents()}
         ${this.addHtmlElementsSVG()}
       </body>
     </html>`;
